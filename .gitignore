@@ -1,0 +1,64 @@
+# ============================
+# Python Core Ignores
+# ============================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# ============================
+# Virtual Environment
+# ============================
+# Definitely ignore this folder to save huge amounts of space
+venv/
+env/
+.venv/
+
+# ============================
+# Database & Secrets (CRITICAL)
+# ============================
+# Never commit the actual SQLite database file containing user data
+*.db
+*.sqlite3
+bank.db
+
+# Ignore environment variable files containing secrets (good practice)
+.env
+
+# ============================
+# Project Specific Generated Files
+# ============================
+# Ignore the CSV statements generated for users
+Statement_*.csv
+
+# ============================
+# IDE & OS Metadata
+# ============================
+# VS Code
+.vscode/
+
+# PyCharm / IntelliJ
+.idea/
+
+# Mac OS
+.DS_Store
+
+# Windows
+Thumbs.db

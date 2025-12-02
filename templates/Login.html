@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Login - Bank of Trust</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/admin_style.css') }}"
+    />
+    <style>
+      /* Specific overrides for the Login Page layout */
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+        /* Deep Void Gradient Background */
+        background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+        font-family: "Inter", sans-serif;
+      }
+
+      .auth-box {
+        width: 400px;
+        padding: 40px;
+        /* Glassmorphism Effect */
+        background: rgba(30, 41, 59, 0.7);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      }
+
+      .auth-header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      /* Logo styling */
+      .auth-header img {
+        width: 70px;
+        margin-bottom: 15px;
+        filter: drop-shadow(0 0 10px rgba(124, 58, 237, 0.3));
+      }
+
+      .auth-header h2 {
+        margin: 0;
+        font-size: 24px;
+        color: #f8fafc;
+        font-weight: 700;
+      }
+
+      input {
+        width: 100%;
+        padding: 12px 15px;
+        margin-bottom: 15px;
+        /* Input fields blend with the dark theme */
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        color: white;
+        font-size: 15px;
+        outline: none;
+        transition: 0.3s;
+      }
+
+      /* Glow effect on focus */
+      input:focus {
+        border-color: #7c3aed;
+        box-shadow: 0 0 10px rgba(124, 58, 237, 0.2);
+      }
+
+      /* Flash Messages (Errors) */
+      .flash-msg {
+        background: rgba(239, 68, 68, 0.2);
+        color: #fca5a5;
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        font-size: 14px;
+        text-align: center;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+      }
+
+      /* Back Link Hover Effect */
+      .back-link {
+        color: #94a3b8;
+        font-size: 13px;
+        text-decoration: none;
+        transition: 0.3s;
+      }
+      .back-link:hover {
+        color: #7c3aed;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="auth-box">
+      <div class="auth-header">
+        <img
+          src="{{ url_for('static', filename='Images/logo0.png') }}"
+          alt="Logo"
+        />
+        <h2>Bank of Trust</h2>
+        <p style="color: #94a3b8; font-size: 14px; margin-top: 5px">
+          Retail Banking Portal
+        </p>
+      </div>
+
+      {% with messages = get_flashed_messages() %} {% if messages %} {% for
+      message in messages %}
+      <div class="flash-msg">{{ message }}</div>
+      {% endfor %} {% endif %} {% endwith %}
+
+      <form action="/login" method="post">
+        <input name="email" type="email" placeholder="Email Address" required />
+        <input
+          name="password"
+          type="password"
+          placeholder="Password"
+          required
+        />
+
+        <button class="btn red" type="submit">Secure Login</button>
+      </form>
+
+      <div style="text-align: center; margin-top: 20px">
+        <a href="/" class="back-link">&larr; Back to Home</a>
+      </div>
+    </div>
+  </body>
+</html>

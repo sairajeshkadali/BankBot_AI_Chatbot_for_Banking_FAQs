@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Dashboard - Bank of Trust</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/admin_style.css') }}"
+    />
+    <style>
+      /* =================================
+       CRITICAL LAYOUT & Z-INDEX FIXES
+       ================================= */
+      body {
+        margin: 0;
+        overflow-x: hidden;
+      }
+
+      /* Header (Layer 100) */
+      .topbar {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 15px 40px !important;
+        background: rgba(30, 41, 59, 0.95);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      /* Dashboard Container */
+      .dashboard-wrap {
+        padding: 40px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .welcome-text {
+        font-size: 28px;
+        color: var(--text-main);
+        font-weight: 700;
+        margin-bottom: 30px;
+      }
+      .welcome-text span {
+        color: var(--primary);
+      }
+
+      /* Stats Grid */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
+      }
+
+      .stat-card {
+        background: var(--bg-card);
+        padding: 25px;
+        border-radius: 15px;
+        border: 1px solid var(--border);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+      }
+      .stat-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--primary);
+      }
+
+      .stat-label {
+        color: var(--text-muted);
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 10px;
+      }
+      .stat-value {
+        font-size: 28px;
+        color: var(--text-main);
+        font-weight: 700;
+      }
+      .stat-value.balance {
+        color: var(--success);
+        text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+      }
+
+      /* Transaction Table */
+      .txn-container {
+        background: var(--bg-card);
+        border-radius: 15px;
+        padding: 30px;
+        border: 1px solid var(--border);
+      }
+      .txn-header {
+        font-size: 20px;
+        color: var(--text-main);
+        margin-bottom: 25px;
+        font-weight: 600;
+        border-left: 4px solid var(--primary);
+        padding-left: 15px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th {
+        text-align: left;
+        color: var(--text-muted);
+        padding: 15px;
+        font-size: 13px;
+        border-bottom: 1px solid var(--border);
+        text-transform: uppercase;
+      }
+      td {
+        padding: 15px;
+        color: var(--text-main);
+        font-size: 14px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      tr:last-child td {
+        border-bottom: none;
+      }
+      tr:hover td {
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      /* Chat Button (Layer 2001) */
+      #bot-trigger {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 65px;
+        height: 65px;
+        background: var(--primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        box-shadow: 0 10px 30px rgba(124, 58, 237, 0.5);
+        cursor: pointer;
+        border: none;
+        transition: 0.3s;
+        z-index: 2001;
+        animation: bounceIn 1s;
+      }
+      #bot-trigger:hover {
+        transform: scale(1.1) rotate(10deg);
+        background: #6d28d9;
+      }
+
+      /* Chat Popup (Layer 2000) - RESIZED */
+      #chat-frame {
+        position: fixed;
+        bottom: 110px;
+        right: 30px;
+        width: 380px;
+
+        /* ✅ CHANGED: Smaller height + Safety limit */
+        height: 500px;
+        max-height: 70vh; /* Ensures it never exceeds 70% of screen height */
+
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        display: none;
+        overflow: hidden;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+        z-index: 2000;
+        backdrop-filter: blur(20px);
+      }
+      iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+
+      @keyframes bounceIn {
+        0% {
+          transform: scale(0);
+          opacity: 0;
+        }
+        60% {
+          transform: scale(1.1);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <img
+          src="{{ url_for('static', filename='Images/logo0.png') }}"
+          class="logo"
+        />
+        <h1 class="bank-name">Bank of <span>Trust</span></h1>
+      </div>
+      <div style="display: flex; align-items: center; gap: 25px">
+        <a
+          href="/chat_logs"
+          style="
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: 0.3s;
+          "
+          >History</a
+        >
+        <button
+          class="btn blue"
+          style="
+            width: auto;
+            padding: 10px 25px;
+            margin: 0;
+            border-radius: 50px;
+          "
+          onclick="location.href='/logout'"
+        >
+          Logout
+        </button>
+      </div>
+    </header>
+
+    <div class="dashboard-wrap">
+      <div class="welcome-text">👋 Welcome back, <span>{{ name }}</span></div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Balance</div>
+          <div class="stat-value balance">₹{{ balance }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Account Number</div>
+          <div class="stat-value">{{ account }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Branch Details</div>
+          <div class="stat-value" style="font-size: 16px">
+            IFSC: BOT000123<br />
+            <span style="color: var(--text-muted); font-size: 13px"
+              >Hyderabad Main</span
+            >
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Profile Status</div>
+          <div
+            class="stat-value"
+            style="font-size: 16px; color: var(--success)"
+          >
+            ✅ KYC Verified<br />
+            <span style="font-size: 12px; color: var(--text-muted)"
+              >{{ email }}</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <div class="txn-container">
+        <div class="txn-header">Recent Transactions</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Mode</th>
+              <th>Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for t in transactions %}
+            <tr>
+              <td>{{ t.date }}</td>
+              <td>{{ t.type }}</td>
+              <td>{{ t.mode }}</td>
+              <td>₹{{ t.amount }}</td>
+              <td style="color: var(--success); font-weight: 600">
+                {{ t.status }}
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td
+                colspan="5"
+                style="
+                  text-align: center;
+                  color: var(--text-muted);
+                  padding: 30px;
+                "
+              >
+                No transactions found. Start chatting to make a transfer!
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <button id="bot-trigger">🤖</button>
+    <div id="chat-frame">
+      <iframe src="/chat"></iframe>
+    </div>
+
+    <script>
+      const btn = document.getElementById("bot-trigger");
+      const frame = document.getElementById("chat-frame");
+
+      btn.onclick = () => {
+        if (frame.style.display === "block") {
+          frame.style.display = "none";
+          btn.innerHTML = "🤖";
+        } else {
+          frame.style.display = "block";
+          btn.innerHTML = "❌";
+        }
+      };
+    </script>
+  </body>
+</html>

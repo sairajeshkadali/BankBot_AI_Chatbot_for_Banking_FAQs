@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Corporate Admin - Bank of Trust</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/admin_style.css') }}"
+    />
+    <style>
+      /* =================================
+       CRITICAL LAYOUT FIXES
+       ================================= */
+      body {
+        margin: 0;
+        overflow-x: hidden;
+      }
+
+      /* Force Header Layout */
+      .topbar {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 15px 40px !important; /* Adds space from edges */
+        background: rgba(30, 41, 59, 0.95);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      /* Admin Specific Layout */
+      .dashboard-wrap {
+        padding: 40px;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 40px;
+      }
+
+      .page-title h2 {
+        font-size: 28px;
+        margin: 0;
+        color: var(--text-main);
+      }
+      .page-title p {
+        color: var(--text-muted);
+        margin: 5px 0 0 0;
+        font-size: 14px;
+      }
+
+      /* Stats Grid */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
+      }
+
+      .stat-card {
+        background: var(--bg-card);
+        padding: 25px;
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .stat-card::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: radial-gradient(
+          circle,
+          rgba(124, 58, 237, 0.1) 0%,
+          transparent 70%
+        );
+      }
+
+      .stat-head {
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-muted);
+        margin-bottom: 10px;
+      }
+      .stat-num {
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--text-main);
+      }
+      .stat-sub {
+        font-size: 12px;
+        color: var(--success);
+        margin-top: 5px;
+      }
+
+      /* Data Table */
+      .table-card {
+        background: var(--bg-card);
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        padding: 25px;
+      }
+
+      .table-header {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: var(--primary);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th {
+        text-align: left;
+        padding: 15px;
+        color: var(--text-muted);
+        border-bottom: 1px solid var(--border);
+        font-size: 13px;
+        text-transform: uppercase;
+      }
+      td {
+        padding: 15px;
+        color: var(--text-main);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        font-size: 14px;
+        vertical-align: top;
+      }
+      tr:last-child td {
+        border-bottom: none;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <img
+          src="{{ url_for('static', filename='Images/logo0.png') }}"
+          class="logo"
+        />
+        <h1 class="bank-name">Bank of <span>Trust</span></h1>
+      </div>
+      <div style="display: flex; gap: 20px; align-items: center">
+        <div style="display: flex; align-items: center; gap: 8px">
+          <span
+            style="
+              color: #10b981;
+              font-size: 14px;
+              text-shadow: 0 0 8px rgba(16, 185, 129, 0.8);
+            "
+            >●</span
+          >
+
+          <span style="color: #94a3b8; font-size: 13px; font-weight: 500"
+            >System Operational</span
+          >
+        </div>
+
+        <button
+          class="btn blue"
+          style="
+            width: auto;
+            padding: 10px 25px;
+            margin: 0;
+            border-radius: 50px;
+          "
+          onclick="location.href='/logout'"
+        >
+          Logout
+        </button>
+      </div>
+    </header>
+
+    <div class="dashboard-wrap">
+      <div class="page-header">
+        <div class="page-title">
+          <h2>AI Performance Overview</h2>
+          <p>Real-time analytics for Bank of Trust Neural Engine.</p>
+        </div>
+        <div>
+          <span style="color: var(--text-muted); font-size: 14px"
+            >Last Retrained:
+            <strong style="color: var(--text-main)"
+              >{{ last_retrained }}</strong
+            ></span
+          >
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-head">Total Interactions</div>
+          <div class="stat-num">{{ total_queries }}</div>
+          <div class="stat-sub">↑ 12% vs last week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-head">Unique Intents</div>
+          <div class="stat-num">{{ total_intents }}</div>
+          <div class="stat-sub">Across 5 Categories</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-head">Model Accuracy</div>
+          <div class="stat-num">{{ accuracy }}</div>
+          <div class="stat-sub">Confidence Score > 0.8</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-head">Server Status</div>
+          <div class="stat-num" style="font-size: 24px; color: var(--success)">
+            Active
+          </div>
+          <div class="stat-sub">Latency: 45ms</div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">Live Traffic Log (Recent 5)</div>
+        <table>
+          <thead>
+            <tr>
+              <th width="15%">Time</th>
+              <th width="15%">Account</th>
+              <th width="30%">User Query</th>
+              <th width="40%">Bot Response</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for acct, msg, resp, time in recent_queries %}
+            <tr>
+              <td style="color: var(--text-muted)">{{ time }}</td>
+              <td>
+                <span style="font-family: monospace; color: var(--accent)"
+                  >{{ acct }}</span
+                >
+              </td>
+              <td>{{ msg }}</td>
+              <td>{{ resp[:60] }}...</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </body>
+</html>

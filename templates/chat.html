@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BOT Assistant</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg-void: #020617;
+      --bg-card: #1e293b;
+      --primary: #7c3aed;       /* Electric Purple */
+      --primary-dark: #6d28d9;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: rgba(255, 255, 255, 0.1);
+    }
+    
+    * { box-sizing: border-box; font-family: "Inter", sans-serif; }
+    
+    body {
+      margin: 0;
+      height: 100vh;
+      background-color: var(--bg-void);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden; /* Prevent double scrollbars in iframe */
+    }
+
+    /* HEADER */
+    header {
+      background: rgba(30, 41, 59, 0.95);
+      padding: 15px 20px;
+      color: var(--text-main);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      backdrop-filter: blur(5px);
+    }
+    
+    header .status-dot {
+      width: 8px; height: 8px;
+      background-color: #10b981; /* Green for online */
+      border-radius: 50%;
+      box-shadow: 0 0 8px #10b981;
+    }
+
+    /* CHAT AREA */
+    .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .chat-box {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      scroll-behavior: smooth;
+    }
+
+    /* MESSAGES */
+    .msg {
+      max-width: 80%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.5;
+      position: relative;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .bot {
+      background: var(--bg-card);
+      color: var(--text-main);
+      align-self: flex-start;
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 2px;
+    }
+
+    .user {
+      background: var(--primary);
+      color: white;
+      align-self: flex-end;
+      border-bottom-right-radius: 2px;
+      box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+    }
+
+    /* INTENT TAG (Debug/Info) */
+    .meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: -10px;
+      margin-left: 5px;
+      margin-bottom: 10px;
+      align-self: flex-start;
+    }
+    
+    .intent-chip {
+      background: rgba(255,255,255,0.05);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    /* INPUT AREA */
+    form {
+      display: flex;
+      padding: 15px;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+      gap: 10px;
+    }
+
+    input {
+      flex: 1;
+      padding: 12px 15px;
+      border-radius: 25px;
+      border: 1px solid var(--border);
+      background: rgba(2, 6, 23, 0.5);
+      color: white;
+      outline: none;
+      transition: 0.2s;
+    }
+    input:focus { border-color: var(--primary); }
+
+    button {
+      padding: 10px 20px;
+      border-radius: 25px;
+      border: none;
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    button:hover { background: var(--primary-dark); }
+
+    /* SCROLLBAR */
+    .chat-box::-webkit-scrollbar { width: 6px; }
+    .chat-box::-webkit-scrollbar-track { background: transparent; }
+    .chat-box::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="status-dot"></div>
+    BOT Assistant
+  </header>
+
+  <div class="chat-container">
+    <div id="chatBox" class="chat-box">
+      <div class="msg bot">👋 Hello! I'm your Bank of Trust AI. How can I help you with your finances today?</div>
+    </div>
+
+    <form id="chatForm">
+      <input id="userInput" placeholder="Type a message..." autocomplete="off" />
+      <button type="submit">Send</button>
+    </form>
+  </div>
+
+  <script>
+    const chatBox = document.getElementById('chatBox');
+    const chatForm = document.getElementById('chatForm');
+    const userInput = document.getElementById('userInput');
+
+    // Reset session context on load
+    fetch('/reset_context', { method: 'POST' }).catch(()=>{});
+
+    function addBot(msg, intent){
+      const d = document.createElement('div'); 
+      d.className = 'msg bot'; 
+      // Handle newlines for lists
+      d.innerHTML = msg.replace(/\n/g, '<br>');
+      chatBox.appendChild(d);
+
+      if(intent && intent !== 'unknown' && intent !== 'greet'){
+        const m = document.createElement('div');
+        m.className = 'meta';
+        m.innerHTML = `<span class="intent-chip">Intent: ${intent}</span>`;
+        chatBox.appendChild(m);
+      }
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function addUser(text){
+      const d = document.createElement('div'); 
+      d.className = 'msg user'; 
+      d.textContent = text;
+      chatBox.appendChild(d); 
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    chatForm.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const text = userInput.value.trim();
+      if(!text) return;
+      
+      addUser(text);
+      userInput.value = '';
+      
+      // Visual feedback (Typing...)
+      const loader = document.createElement('div');
+      loader.className = 'msg bot';
+      loader.innerHTML = '<span style="color:#94a3b8; font-size:12px;">Typing...</span>';
+      chatBox.appendChild(loader);
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      try{
+        const res = await fetch('/get_response', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ message: text })
+        });
+        const data = await res.json();
+        
+        loader.remove(); // Remove typing indicator
+        addBot(data.response, data.intent); 
+      }catch(e){
+        loader.remove();
+        addBot('⚠️ Connection error. Please try again.');
+      }
+    });
+  </script>
+</body>
+</html>

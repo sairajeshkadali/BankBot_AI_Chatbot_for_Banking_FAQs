@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Chat History - Bank of Trust</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_style.css') }}">
+  <style>
+    /* =================================
+       CRITICAL LAYOUT FIXES
+       ================================= */
+    body {
+      margin: 0;
+      overflow-x: hidden;
+    }
+
+    /* Force Header Layout */
+    .topbar {
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      padding: 15px 40px !important; /* Adds space from edges */
+      background: rgba(30, 41, 59, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .contact {
+        text-align: right;
+    }
+
+    /* Page Layout */
+    .history-container {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      background: var(--bg-card);
+      padding: 15px 25px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .toolbar h2 { margin: 0; font-size: 20px; color: var(--text-main); }
+
+    .search-box input {
+      background: rgba(2, 6, 23, 0.6);
+      border: 1px solid var(--border);
+      padding: 10px 15px;
+      border-radius: 8px;
+      color: white;
+      width: 250px;
+      outline: none;
+    }
+    .search-box input:focus { border-color: var(--primary); }
+
+    .btn-export {
+      background: var(--primary);
+      color: white;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: 0.3s;
+    }
+    .btn-export:hover { background: var(--primary-hover); box-shadow: 0 0 15px var(--primary-glow); }
+
+    .back-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .back-link:hover { color: var(--primary); }
+
+    /* History Table */
+    .log-card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+    th { background: rgba(0,0,0,0.2); padding: 15px 25px; text-align: left; color: var(--primary); font-size: 13px; font-weight: 600; }
+    td { padding: 20px 25px; border-bottom: 1px solid var(--border); color: var(--text-main); font-size: 14px; line-height: 1.5; }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+    
+    .time-stamp { color: var(--text-muted); font-size: 12px; white-space: nowrap; }
+    .bot-reply { color: #cbd5e1; }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="brand">
+      <img src="{{ url_for('static', filename='Images/logo0.png') }}" class="logo">
+      <h1 class="bank-name">Bank of <span>Trust</span></h1>
+    </div>
+    <div class="contact">
+      <p style="margin:0; font-size:12px; color:#94a3b8;">Logged in as</p>
+      <strong style="font-size:16px; color:#7c3aed;">{{ session.get('name', 'User') }}</strong>
+    </div>
+  </header>
+
+  <div class="history-container">
+    <a href="/dashboard" class="back-link">&larr; Back to Dashboard</a>
+
+    <div class="toolbar">
+      <h2>🗂️ Conversation Archives</h2>
+      <div style="display: flex; gap: 15px;">
+        <div class="search-box">
+          <input type="text" id="search" placeholder="Search logs...">
+        </div>
+        <a href="/export_excel" class="btn-export">Download Excel</a>
+      </div>
+    </div>
+
+    <div class="log-card">
+      <table id="logTable">
+        <thead>
+          <tr>
+            <th width="35%">You said</th>
+            <th width="45%">BOT replied</th>
+            <th width="20%">Date & Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u, b, t in logs %}
+          <tr>
+            <td style="font-weight: 500;">{{ u }}</td>
+            <td class="bot-reply">{{ b }}</td>
+            <td class="time-stamp">{{ t }}</td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="3" style="text-align: center; color: var(--text-muted); padding: 30px;">No conversation history found.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('search').addEventListener('keyup', function() {
+      let val = this.value.toLowerCase();
+      let rows = document.querySelectorAll('#logTable tbody tr');
+      
+      rows.forEach(row => {
+        let text = row.textContent.toLowerCase();
+        row.style.display = text.includes(val) ? '' : 'none';
+      });
+    });
+  </script>
+
+</body>
+</html>

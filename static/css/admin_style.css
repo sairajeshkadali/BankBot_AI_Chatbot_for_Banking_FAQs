@@ -1,0 +1,217 @@
+/* =========================================
+   BANK OF TRUST (BOT) - PROFESSIONAL THEME
+   ========================================= */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+
+:root {
+    --bg-void: #020617;       /* Darker Void */
+    --bg-card: rgba(30, 41, 59, 0.7); /* Glassy Slate */
+    --primary: #7c3aed;       /* Electric Purple */
+    --primary-glow: rgba(124, 58, 237, 0.4);
+    --accent: #38bdf8;        /* Sky Blue for gradients */
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --border: rgba(255, 255, 255, 0.1);
+}
+
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-void);
+    color: var(--text-main);
+    overflow-x: hidden;
+    /* Subtle background mesh gradient */
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(124, 58, 237, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(56, 189, 248, 0.15) 0px, transparent 50%);
+}
+
+/* ===== NAVBAR ===== */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 5%;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: rgba(2, 6, 23, 0.8);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.brand img { height: 40px; }
+.brand span { color: var(--primary); }
+
+.nav-links {
+    display: flex;
+    gap: 30px;
+    list-style: none;
+}
+
+.nav-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.nav-links a:hover { color: var(--text-main); }
+
+.nav-actions { display: flex; gap: 15px; }
+
+.btn-nav {
+    padding: 10px 20px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.btn-login {
+    border: 1px solid var(--border);
+    color: var(--text-main);
+}
+.btn-login:hover { border-color: var(--primary); color: var(--primary); }
+
+.btn-signup {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 0 15px var(--primary-glow);
+}
+.btn-signup:hover { transform: translateY(-2px); }
+
+/* ===== HERO SECTION ===== */
+.hero {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    padding: 80px 5%;
+    align-items: center;
+    gap: 50px;
+}
+
+.hero-content h1 {
+    font-size: 56px;
+    line-height: 1.1;
+    font-weight: 800;
+    margin-bottom: 20px;
+    background: linear-gradient(to right, #fff, #94a3b8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-content h1 span {
+    background: linear-gradient(to right, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-content p {
+    font-size: 18px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 40px;
+    max-width: 500px;
+}
+
+.hero-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 30px;
+    border-radius: 24px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    position: relative;
+}
+
+/* Floating Login Form in Hero */
+.login-mini-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.login-mini-form h3 { margin: 0 0 10px 0; font-size: 20px; }
+
+.login-mini-form .btn {
+    padding: 14px;
+    border-radius: 12px;
+    text-align: center;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.btn-primary { background: var(--primary); color: white; }
+.btn-secondary { background: rgba(255,255,255,0.05); color: var(--text-main); border: 1px solid var(--border); }
+
+/* ===== FEATURES GRID ===== */
+.features {
+    padding: 80px 5%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.feature-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 30px;
+    border-radius: 20px;
+    transition: 0.3s;
+}
+
+.feature-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-5px);
+}
+
+.icon-box {
+    width: 50px;
+    height: 50px;
+    background: rgba(124, 58, 237, 0.1);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.feature-card h3 { margin: 0 0 10px 0; font-size: 18px; }
+.feature-card p { color: var(--text-muted); font-size: 14px; line-height: 1.5; }
+
+/* ===== STATS STRIP ===== */
+.stats {
+    background: rgba(255,255,255,0.02);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 40px 5%;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 30px;
+    text-align: center;
+}
+
+.stat-item h2 { margin: 0; font-size: 36px; color: var(--text-main); }
+.stat-item p { margin: 5px 0 0 0; color: var(--primary); font-size: 14px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+
+/* ===== FOOTER ===== */
+footer {
+    padding: 60px 5%;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+}

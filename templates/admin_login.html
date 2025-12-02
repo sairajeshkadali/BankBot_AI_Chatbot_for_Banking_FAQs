@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Corporate Login - Bank of Trust</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_style.css') }}">
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+    }
+    
+    .auth-box {
+      width: 400px;
+      padding: 40px;
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+
+    /* Admin Badge */
+    .admin-badge {
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--primary);
+      color: white;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      box-shadow: 0 0 15px var(--primary-glow);
+    }
+
+    .auth-header { text-align: center; margin-bottom: 30px; }
+    .auth-header img { width: 60px; margin-bottom: 15px; }
+    .auth-header h2 { margin: 0; font-size: 22px; color: var(--text-main); }
+    
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      outline: none;
+    }
+    input:focus { border-color: #38bdf8; } /* Blue focus for admin */
+    
+    .flash-msg {
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      font-size: 14px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="auth-box">
+    <div class="admin-badge">CORPORATE PORTAL</div>
+    
+    <div class="auth-header">
+      <img src="{{ url_for('static', filename='Images/logo0.png') }}" alt="Logo">
+      <h2>Bank of Trust</h2>
+      <p style="color: var(--text-muted); font-size: 14px;">Administrative Access Only</p>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="flash-msg">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form action="/admin_login" method="post">
+      <input name="username" type="text" placeholder="Corporate ID" required />
+      <input name="password" type="password" placeholder="Secure Key" required />
+      <button class="btn blue" style="background: rgba(56, 189, 248, 0.1); color: #38bdf8; border-color: #38bdf8;" type="submit">Verify & Login</button>
+    </form>
+
+    <div style="text-align: center; margin-top: 15px;">
+      <a href="/" style="color: var(--text-muted); font-size: 14px; text-decoration: none;">&larr; Return to Main Site</a>
+    </div>
+  </div>
+
+</body>
+</html>
