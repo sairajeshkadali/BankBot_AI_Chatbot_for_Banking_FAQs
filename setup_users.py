@@ -20,9 +20,9 @@ CREATE TABLE IF NOT EXISTS users (
 
 # Insert the 3 users
 users = [
-    ("100001", "Sai@1234", "Sai Rajesh", "sai@gmail.com", "9666760689", 2500000),
-    ("100002", "Suriya@123", "Suriya V", "suriya@gmail.com", "1234567890", 2420000),
-    ("100003", "Bhaskar@123", "Bhaskar L", "bhaskar@gmail.com", "9876543210", 300000)
+    ("100001", "Sia@1234", "Sia U", "sia@gmail.com", "9666760689", 250000.45),
+    ("100002", "Suriya@123", "Suriya V", "suriya@gmail.com", "1234567890", 242000.36),
+    ("100003", "Bhaskar@123", "Bhaskar L", "bhaskar@gmail.com", "9876543210", 300003.90)
 ]
 
 c.executemany("""
@@ -34,4 +34,4 @@ VALUES (?, ?, ?, ?, ?, ?)
 conn.commit()
 conn.close()
 
-print("✅ Users Seeded Successfully: Sai Rajesh, Suriya, Bhaskar")
+print("✅ Users Seeded Successfully: Sia, Suriya, Bhaskar")

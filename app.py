@@ -1,13 +1,25 @@
 from flask import (
-    Flask, render_template, request, jsonify, send_file,
-    redirect, url_for, session, flash
+    Flask,
+    render_template,
+    request,
+    jsonify,
+    send_file,
+    redirect,
+    url_for,
+    session,
+    flash,
+    Response,
 )
 import csv
+import pandas as pd
+import io
 from datetime import datetime, timedelta
 import os
 
 # BOT LOGIC (The Brain)
+# We import 'bot_brain' and 'TRAINING_FILE' for the Admin Panel features
 import dialogue_manager as bot
+from dialogue_manager import bot_brain, TRAINING_FILE
 
 # DATABASE (The Memory)
 from bank_db import (
@@ -18,14 +30,19 @@ from bank_db import (
     get_transactions,
     get_total_queries,
     get_total_intents,
-    get_recent_chats
+    get_recent_chats,
+    # New Milestone 4 Helpers
+    get_analytics_stats,
+    add_faq,
+    get_all_faqs,
 )
 
 # ---------------- FLASK CONFIG ----------------
-app = Flask(__name__, static_folder='static', template_folder='templates')
+app = Flask(__name__, static_folder="static", template_folder="templates")
 app.secret_key = "bot_secure_key_2025"  # Secure session key
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 
 # ---------------- HELPER: RESET CONTEXT ----------------
 def reset_all_bot_context():
@@ -81,11 +98,11 @@ def login():
             session["name"] = user["name"]
             session["balance"] = user["balance"]
             session["phone"] = user["phone"]
-            
+
             # Init Bot
             bot.session_context["current_user_account"] = user["account_number"]
             reset_all_bot_context()
-            
+
             return redirect(url_for("dashboard"))
 
         flash("❌ Invalid Credentials. Please try again.", "error")
@@ -108,10 +125,10 @@ def dashboard():
         "dashboard.html",
         name=user["name"],
         account=user["account_number"],
-        balance=f"{user['balance']:,}", # Format with commas
+        balance=f"{user['balance']:,}",  # Format with commas
         email=user["email"],
         phone=user["phone"],
-        transactions=transactions
+        transactions=transactions,
     )
 
 
@@ -132,7 +149,7 @@ def reset_context():
     return ("", 204)
 
 
-# ---------------- API: CHAT RESPONSE ----------------
+# ---------------- API: CHAT RESPONSE (UPDATED FOR MILESTONE 4) ----------------
 @app.route("/get_response", methods=["POST"])
 def get_response():
     if not require_login():
@@ -146,20 +163,18 @@ def get_response():
     bot.session_context["current_user_account"] = session["account"]
 
     try:
-        # Call the Brain
-        intent, entities, reply = bot.generate_bot_response(msg)
+        # Call the Brain - NOW UNPACKING 4 VALUES
+        intent, entities, reply, confidence = bot.generate_bot_response(msg)
     except Exception as e:
         print("BOT ERROR:", e)
         reply = "⚠️ System Error: Unable to process request."
-        intent, entities = "error", {}
+        intent, entities, confidence = "error", {}, 0.0
 
-    # Save to DB
-    save_chat(session["account"], msg, reply)
+    # Save to DB with Analytics Metadata
+    is_fallback = 1 if intent == "fallback" else 0
+    save_chat(session["account"], msg, reply, intent, confidence, is_fallback)
 
-    return jsonify({
-        "response": reply,
-        "intent": intent
-    })
+    return jsonify({"response": reply, "intent": intent, "confidence": confidence})
 
 
 # ---------------- ROUTE: CHAT HISTORY ----------------
@@ -170,7 +185,10 @@ def chat_logs():
 
     conn = get_db()
     c = conn.cursor()
-    c.execute("SELECT user_message, bot_response, timestamp FROM chat_logs WHERE account=? ORDER BY id DESC", (session["account"],))
+    c.execute(
+        "SELECT user_message, bot_response, timestamp FROM chat_logs WHERE account=? ORDER BY id DESC",
+        (session["account"],),
+    )
     rows = c.fetchall()
     conn.close()
 
@@ -179,7 +197,9 @@ def chat_logs():
         t_str = r["timestamp"]
         try:
             # Convert UTC to IST (Approx +5:30)
-            dt = datetime.strptime(t_str, "%Y-%m-%d %H:%M:%S") + timedelta(hours=5, minutes=30)
+            dt = datetime.strptime(t_str, "%Y-%m-%d %H:%M:%S") + timedelta(
+                hours=5, minutes=30
+            )
             t_str = dt.strftime("%d %b %I:%M %p")
         except:
             pass
@@ -188,28 +208,36 @@ def chat_logs():
     return render_template("chat_logs.html", logs=formatted_logs)
 
 
-# ---------------- ROUTE: EXPORT EXCEL ----------------
+# ---------------- ROUTE: USER EXPORT EXCEL ----------------
 @app.route("/export_excel")
 def export_excel():
     if not require_login():
         return redirect(url_for("login"))
 
     filename = f"Statement_{session['account']}.csv"
-    filepath = os.path.join(BASE_DIR, filename)
+
+    # Use io.StringIO for in-memory CSV generation (cleaner than file system)
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["User Message", "Bot Response", "Timestamp"])
 
     conn = get_db()
     c = conn.cursor()
-    c.execute("SELECT user_message, bot_response, timestamp FROM chat_logs WHERE account=? ORDER BY id", (session["account"],))
+    c.execute(
+        "SELECT user_message, bot_response, timestamp FROM chat_logs WHERE account=? ORDER BY id",
+        (session["account"],),
+    )
     data = c.fetchall()
     conn.close()
 
-    with open(filepath, "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        writer.writerow(["User Message", "Bot Response", "Timestamp"])
-        for row in data:
-            writer.writerow([row["user_message"], row["bot_response"], row["timestamp"]])
+    for row in data:
+        writer.writerow([row["user_message"], row["bot_response"], row["timestamp"]])
 
-    return send_file(filepath, as_attachment=True)
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-disposition": f"attachment; filename={filename}"},
+    )
 
 
 # ---------------- ROUTE: ADMIN LOGIN ----------------
@@ -230,19 +258,151 @@ def admin_login():
     return render_template("admin_login.html")
 
 
-# ---------------- ROUTE: ADMIN DASHBOARD ----------------
+# ---------------- ROUTE: ADMIN DASHBOARD (UPDATED) ----------------
 @app.route("/admin_dashboard")
 def admin_dashboard():
     if not session.get("admin"):
         return redirect(url_for("admin_login"))
 
+    # Use the new detailed analytics function
+    stats = get_analytics_stats()
+
     return render_template(
         "admin_dashboard.html",
-        total_queries=get_total_queries(),
-        total_intents=get_total_intents(),
-        accuracy="99.2%",
-        last_retrained=datetime.now().strftime("%Y-%m-%d"),
-        recent_queries=get_recent_chats(limit=8)
+        stats=stats,
+        total_queries=stats["total"],
+        # Backwards compatibility if your old template used these variables directly:
+        accuracy=f"{stats['success_rate']}%",
+        recent_queries=get_recent_chats(limit=8),
+    )
+
+
+# =================================================
+# NEW MILESTONE 4 ADMIN ROUTES
+# =================================================
+
+
+@app.route('/admin/training_data', methods=['GET', 'POST'])
+def manage_training_data():
+    """View and Add Training Data via CSV (Robust Version)"""
+    if not session.get("admin"): return jsonify({"error": "Unauthorized"}), 403
+
+    file_path = os.path.join(BASE_DIR, TRAINING_FILE)
+
+    # --- POST: ADD NEW DATA ---
+    if request.method == 'POST':
+        new_text = request.form.get('text', '').strip()
+        new_intent = request.form.get('intent', '').strip()
+        new_response = request.form.get('response', '').strip()
+        
+        try:
+            # Check if file exists to determine if we need a header
+            file_exists = os.path.exists(file_path)
+            
+            # Open in append mode with UTF-8 to support all characters
+            with open(file_path, 'a', newline='', encoding='utf-8') as f:
+                writer = csv.writer(f)
+                # If file didn't exist, write the standard 4-column header matching your file
+                if not file_exists:
+                    writer.writerow(['text', 'intent', 'response', 'entities'])
+                
+                # Write the new row (filling 'entities' as empty JSON '{}')
+                writer.writerow([new_text, new_intent, new_response, '{}'])
+                
+            return jsonify({"status": "success", "msg": "Training example added."})
+        except Exception as e:
+            return jsonify({"status": "error", "msg": str(e)})
+
+    # --- GET: READ DATA ---
+    try:
+        if not os.path.exists(file_path):
+            return jsonify([])
+
+        # Try reading with 'utf-8' first (standard), fallback to 'latin1' if it fails
+        try:
+            df = pd.read_csv(file_path, encoding='utf-8', on_bad_lines='skip', engine='python')
+        except UnicodeDecodeError:
+            df = pd.read_csv(file_path, encoding='latin1', on_bad_lines='skip', engine='python')
+
+        # Clean the data
+        df = df.fillna("")  # Replace NaN with empty string
+        
+        # Ensure we have the required columns (add if missing)
+        for col in ['text', 'intent', 'response']:
+            if col not in df.columns:
+                df[col] = ""
+
+        # Return the last 50 rows
+        data = df.tail(50).to_dict(orient='records')
+        return jsonify(data)
+
+    except Exception as e:
+        print(f"CSV Load Error: {e}") # Print exact error to console
+        # Return an empty list instead of an error so the UI doesn't break completely
+        return jsonify([])
+
+
+@app.route("/admin/retrain", methods=["POST"])
+def retrain_model_route():
+    """Trigger Hot-Reload of the AI Model"""
+    if not session.get("admin"):
+        return jsonify({"error": "Unauthorized"}), 403
+
+    success, msg = bot_brain.train_model()
+    return jsonify({"status": "success" if success else "error", "message": msg})
+
+
+@app.route("/admin/faqs", methods=["GET", "POST"])
+def manage_faqs():
+    """Manage Static Knowledge Base"""
+    if not session.get("admin"):
+        return jsonify({"error": "Unauthorized"}), 403
+
+    if request.method == "POST":
+        question = request.form.get("question")
+        answer = request.form.get("answer")
+        add_faq(question, answer)
+        return jsonify({"status": "success", "msg": "FAQ added."})
+
+    # GET all FAQs
+    faqs = get_all_faqs()
+    # Convert tuple rows to dict list for JSON
+    faq_list = [{"id": f[0], "question": f[1], "answer": f[2]} for f in faqs]
+    return jsonify(faq_list)
+
+
+@app.route("/admin/export_logs")
+def admin_export_logs():
+    """Admin Full System Log Export"""
+    if not session.get("admin"):
+        return redirect(url_for("admin_login"))
+
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT * FROM chat_logs")
+    rows = c.fetchall()
+    conn.close()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(
+        [
+            "ID",
+            "Account",
+            "User Message",
+            "Bot Response",
+            "Intent",
+            "Confidence",
+            "Is Fallback",
+            "Timestamp",
+        ]
+    )
+    writer.writerows(rows)
+
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-disposition": "attachment; filename=admin_system_logs.csv"},
     )
 
 
@@ -253,6 +413,24 @@ def logout():
     session.clear()
     return redirect(url_for("admin_home"))
 
+
+# ... (Paste this near the bottom, before the __main__ block)
+
+@app.route('/admin/logs_json')
+def admin_logs_json():
+    """Fetch the last 100 logs for the Admin UI table"""
+    if not session.get("admin"): return jsonify([])
+    
+    conn = get_db()
+    c = conn.cursor()
+    # Fetch last 100 logs, sorted by newest first
+    c.execute("SELECT * FROM chat_logs ORDER BY id DESC LIMIT 100")
+    rows = c.fetchall()
+    conn.close()
+    
+    # Convert SQLite Rows to a list of dictionaries
+    logs_data = [dict(row) for row in rows]
+    return jsonify(logs_data)
 
 # ---------------- RUNNER ----------------
 if __name__ == "__main__":

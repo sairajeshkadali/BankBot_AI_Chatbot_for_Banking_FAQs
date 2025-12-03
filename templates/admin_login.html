@@ -1,102 +1,278 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <title>Corporate Login - Bank of Trust</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_style.css') }}">
-  <style>
-    body {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
-    }
-    
-    .auth-box {
-      width: 400px;
-      padding: 40px;
-      background: rgba(30, 41, 59, 0.7);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 20px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-      position: relative;
-    }
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Corporate Login - Bank of Trust</title>
 
-    /* Admin Badge */
-    .admin-badge {
-      position: absolute;
-      top: -15px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--primary);
-      color: white;
-      padding: 5px 15px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      box-shadow: 0 0 15px var(--primary-glow);
-    }
+    <!-- Fonts & Icons -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
 
-    .auth-header { text-align: center; margin-bottom: 30px; }
-    .auth-header img { width: 60px; margin-bottom: 15px; }
-    .auth-header h2 { margin: 0; font-size: 22px; color: var(--text-main); }
-    
-    input {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 15px;
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: white;
-      font-size: 16px;
-      outline: none;
-    }
-    input:focus { border-color: #38bdf8; } /* Blue focus for admin */
-    
-    .flash-msg {
-      background: rgba(239, 68, 68, 0.2);
-      color: #fca5a5;
-      padding: 10px;
-      border-radius: 8px;
-      margin-bottom: 15px;
-      font-size: 14px;
-      text-align: center;
-    }
-  </style>
-</head>
-<body>
+    <style>
+      :root {
+        /* Neo-FinTech Theme Variables */
+        --bg-dark: #020617; /* Deep Slate */
+        --primary: #8b5cf6; /* Electric Purple */
+        --primary-dark: #7c3aed;
+        --accent: #c084fc; /* Lavender */
+        --error: #ef4444;
 
-  <div class="auth-box">
-    <div class="admin-badge">CORPORATE PORTAL</div>
-    
-    <div class="auth-header">
-      <img src="{{ url_for('static', filename='Images/logo0.png') }}" alt="Logo">
-      <h2>Bank of Trust</h2>
-      <p style="color: var(--text-muted); font-size: 14px;">Administrative Access Only</p>
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+
+        --glass-bg: rgba(30, 41, 59, 0.7);
+        --glass-border: rgba(255, 255, 255, 0.08);
+      }
+
+      body {
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--bg-dark);
+        font-family: "Inter", sans-serif;
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* Abstract Security Grid Background */
+      body::before {
+        content: "";
+        position: absolute;
+        width: 200%;
+        height: 200%;
+        background-image: linear-gradient(
+            rgba(255, 255, 255, 0.03) 1px,
+            transparent 1px
+          ),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 40px 40px;
+        transform: perspective(500px) rotateX(60deg);
+        top: -50%;
+        z-index: -1;
+        opacity: 0.5;
+      }
+
+      /* Central Glow - Adjusted to Purple */
+      body::after {
+        content: "";
+        position: absolute;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(
+          circle,
+          rgba(139, 92, 246, 0.15) 0%,
+          transparent 60%
+        );
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: -1;
+      }
+
+      .login-card {
+        width: 100%;
+        max-width: 400px;
+        padding: 40px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        text-align: center;
+        position: relative;
+      }
+
+      /* Admin Badge - Switched to Purple Gradient */
+      .admin-badge {
+        position: absolute;
+        top: -16px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(90deg, #8b5cf6, #6d28d9);
+        color: white;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 6px 16px;
+        border-radius: 20px;
+        letter-spacing: 1px;
+        box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        z-index: 10;
+      }
+
+      .header-section {
+        margin-bottom: 30px;
+      }
+      .logo {
+        width: 50px;
+        margin-bottom: 15px;
+        filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.5));
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 22px;
+        color: var(--text-main);
+        font-weight: 700;
+      }
+      p.subtitle {
+        margin: 5px 0 0;
+        font-size: 13px;
+        color: var(--text-muted);
+      }
+
+      /* Inputs */
+      .input-group {
+        position: relative;
+        margin-bottom: 18px;
+      }
+      .input-group i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 14px;
+        transition: 0.3s;
+      }
+      input {
+        width: 100%;
+        padding: 12px 12px 12px 40px;
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid var(--glass-border);
+        border-radius: 10px;
+        color: white;
+        font-size: 14px;
+        outline: none;
+        transition: 0.3s;
+        box-sizing: border-box;
+        font-family: inherit;
+      }
+      input:focus {
+        border-color: var(--primary);
+        background: rgba(15, 23, 42, 0.9);
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+      }
+      input:focus + i {
+        color: var(--accent);
+      }
+
+      /* Button - Switched to Purple Theme */
+      .btn-login {
+        width: 100%;
+        padding: 12px;
+        margin-top: 10px;
+        background: rgba(139, 92, 246, 0.1);
+        color: var(--accent);
+        border: 1px solid rgba(139, 92, 246, 0.3);
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .btn-login:hover {
+        background: rgba(139, 92, 246, 0.2);
+        box-shadow: 0 0 15px rgba(139, 92, 246, 0.15);
+        transform: translateY(-1px);
+        color: white;
+      }
+
+      /* Flash Messages */
+      .flash-msg {
+        background: rgba(239, 68, 68, 0.15);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        color: #fca5a5;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      .footer-link {
+        margin-top: 25px;
+        font-size: 12px;
+      }
+      .footer-link a {
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .footer-link a:hover {
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-card">
+      <!-- Floating Badge -->
+      <div class="admin-badge">CORPORATE PORTAL</div>
+
+      <div class="header-section">
+        <img
+          src="{{ url_for('static', filename='Images/logo0.png') }}"
+          alt="Logo"
+          class="logo"
+        />
+        <h2>Bank of Trust</h2>
+        <p class="subtitle">Administrative Access Control</p>
+      </div>
+
+      {% with messages = get_flashed_messages() %} {% if messages %} {% for
+      message in messages %}
+      <div class="flash-msg">
+        <i class="fas fa-shield-alt"></i> {{ message }}
+      </div>
+      {% endfor %} {% endif %} {% endwith %}
+
+      <form action="/admin_login" method="post">
+        <div class="input-group">
+          <input
+            name="username"
+            type="text"
+            placeholder="Corporate ID"
+            required
+            autocomplete="off"
+          />
+          <i class="fas fa-id-badge"></i>
+        </div>
+
+        <div class="input-group">
+          <input
+            name="password"
+            type="password"
+            placeholder="Secure Key"
+            required
+          />
+          <i class="fas fa-key"></i>
+        </div>
+
+        <button class="btn-login" type="submit">
+          <i class="fas fa-fingerprint"></i> Verify & Login
+        </button>
+      </form>
+
+      <div class="footer-link">
+        <a href="/"> <i class="fas fa-arrow-left"></i> Return to Main Site </a>
+      </div>
     </div>
-
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        {% for message in messages %}
-          <div class="flash-msg">{{ message }}</div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
-
-    <form action="/admin_login" method="post">
-      <input name="username" type="text" placeholder="Corporate ID" required />
-      <input name="password" type="password" placeholder="Secure Key" required />
-      <button class="btn blue" style="background: rgba(56, 189, 248, 0.1); color: #38bdf8; border-color: #38bdf8;" type="submit">Verify & Login</button>
-    </form>
-
-    <div style="text-align: center; margin-top: 15px;">
-      <a href="/" style="color: var(--text-muted); font-size: 14px; text-decoration: none;">&larr; Return to Main Site</a>
-    </div>
-  </div>
-
-</body>
+  </body>
 </html>

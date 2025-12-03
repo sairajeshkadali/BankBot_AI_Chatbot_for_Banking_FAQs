@@ -1,115 +1,529 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bank of Trust - The Future of Banking</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_style.css') }}">
-  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-</head>
-<body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bank of Trust - The Future of Banking</title>
 
-  <nav class="navbar">
-    <div class="brand">
-      <img src="{{ url_for('static', filename='Images/logo0.png') }}" alt="Logo">
-      Bank of <span>Trust</span>
-    </div>
-    
-    <ul class="nav-links">
-      <li><a href="#">Personal</a></li>
-      <li><a href="#">Business</a></li>
-      <li><a href="#">Loans</a></li>
-      <li><a href="#">Company</a></li>
-    </ul>
+    <!-- Fonts & Icons -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
 
-    <div class="nav-actions">
-      <a href="{{ url_for('admin_login') }}" class="btn-nav btn-login">Admin Portal</a>
-      <a href="{{ url_for('login') }}" class="btn-nav btn-signup">Sign In</a>
-    </div>
-  </nav>
+    <style>
+      :root {
+        /* Neo-FinTech Theme Variables */
+        --bg-void: #020617;
+        --bg-slate: #0f172a;
 
-  <header class="hero">
-    <div class="hero-content">
-      <h1>Banking tailored for <br><span>tomorrow's world.</span></h1>
-      <p>
-        Experience the next generation of financial technology. 
-        Zero hidden fees, AI-powered insights, and military-grade security.
-        Welcome to the Bank of Trust.
-      </p>
-      <div style="display: flex; gap: 15px;">
-        <a href="{{ url_for('login') }}" class="btn-nav btn-signup" style="padding: 15px 30px;">Get Started</a>
-        <a href="#features" class="btn-nav btn-login" style="padding: 15px 30px;">Learn More</a>
+        --primary: #8b5cf6;
+        --primary-glow: rgba(139, 92, 246, 0.5);
+        --accent: #38bdf8; /* Sky Blue for Admin/Corp */
+
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+
+        --glass-bg: rgba(30, 41, 59, 0.4);
+        --glass-border: rgba(255, 255, 255, 0.08);
+
+        --card-bg: #1e293b;
+      }
+
+      /* --- RESET & BASE --- */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: var(--bg-void);
+        color: var(--text-main);
+        overflow-x: hidden;
+        line-height: 1.6;
+      }
+
+      /* Ambient Background Orbs */
+      .ambient-glow {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: -1;
+        background: radial-gradient(
+            circle at 15% 50%,
+            rgba(139, 92, 246, 0.08) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 85% 30%,
+            rgba(56, 189, 248, 0.08) 0%,
+            transparent 50%
+          );
+      }
+
+      /* --- NAVBAR --- */
+      .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 5%;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        background: rgba(2, 6, 23, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--glass-border);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+      }
+      .brand img {
+        height: 32px;
+        filter: drop-shadow(0 0 5px var(--primary-glow));
+      }
+      .brand span {
+        color: var(--primary);
+      }
+
+      .nav-links {
+        list-style: none;
+        display: flex;
+        gap: 30px;
+      }
+      .nav-links a {
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        transition: 0.3s;
+      }
+      .nav-links a:hover {
+        color: var(--text-main);
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+      }
+
+      .nav-actions {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+      }
+
+      .btn-ghost {
+        color: var(--text-main);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        padding: 8px 16px;
+        border: 1px solid var(--glass-border);
+        border-radius: 8px;
+        transition: 0.3s;
+      }
+      .btn-ghost:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+      }
+
+      .btn-solid {
+        background: var(--primary);
+        color: white;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        padding: 9px 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
+        transition: 0.3s;
+      }
+      .btn-solid:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(139, 92, 246, 0.5);
+      }
+
+      /* --- HERO SECTION --- */
+      .hero {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        align-items: center;
+        padding: 80px 5%;
+        min-height: 85vh;
+        position: relative;
+      }
+
+      .hero-content h1 {
+        font-size: 3.5rem;
+        line-height: 1.1;
+        font-weight: 800;
+        margin-bottom: 20px;
+        letter-spacing: -1px;
+      }
+      .hero-content span {
+        background: linear-gradient(to right, #8b5cf6, #c084fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .hero-content p {
+        font-size: 1.1rem;
+        color: var(--text-muted);
+        max-width: 500px;
+        margin-bottom: 30px;
+      }
+
+      /* Quick Access Card */
+      .hero-card {
+        display: flex;
+        justify-content: flex-end;
+      }
+      .login-mini-form {
+        width: 100%;
+        max-width: 380px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--glass-border);
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        position: relative;
+        overflow: hidden;
+      }
+      /* Top accent line */
+      .login-mini-form::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(90deg, var(--primary), var(--accent));
+      }
+
+      .login-mini-form h3 {
+        font-size: 18px;
+        margin-bottom: 5px;
+      }
+
+      .btn-block {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        margin-bottom: 12px;
+        transition: 0.2s;
+      }
+
+      /* Retail Button (Primary) */
+      .btn-retail {
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        color: white;
+        border: 1px solid transparent;
+      }
+      .btn-retail:hover {
+        box-shadow: 0 5px 15px rgba(139, 92, 246, 0.4);
+      }
+
+      /* Corporate Button (Secondary) */
+      .btn-corp {
+        background: rgba(56, 189, 248, 0.1);
+        color: #38bdf8;
+        border: 1px solid rgba(56, 189, 248, 0.2);
+      }
+      .btn-corp:hover {
+        background: rgba(56, 189, 248, 0.2);
+        border-color: #38bdf8;
+      }
+
+      /* --- STATS SECTION --- */
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 30px;
+        padding: 60px 5%;
+        background: rgba(30, 41, 59, 0.2);
+        border-top: 1px solid var(--glass-border);
+        border-bottom: 1px solid var(--glass-border);
+      }
+      .stat-item {
+        text-align: center;
+        transition: 0.3s;
+      }
+      .stat-item:hover {
+        transform: translateY(-5px);
+      }
+      .stat-item h2 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 5px;
+        background: linear-gradient(to bottom, #fff, #94a3b8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .stat-item p {
+        color: var(--accent);
+        font-size: 14px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      /* --- FEATURES SECTION --- */
+      .features {
+        padding: 100px 5%;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+      }
+      .feature-card {
+        background: var(--card-bg);
+        padding: 30px;
+        border-radius: 16px;
+        border: 1px solid var(--glass-border);
+        transition: 0.3s;
+      }
+      .feature-card:hover {
+        border-color: var(--primary);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px -10px rgba(139, 92, 246, 0.15);
+      }
+
+      .icon-box {
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        margin-bottom: 20px;
+        transition: 0.3s;
+      }
+      .feature-card:hover .icon-box {
+        background: var(--primary);
+        color: white;
+      }
+
+      .feature-card h3 {
+        font-size: 18px;
+        margin-bottom: 10px;
+      }
+      .feature-card p {
+        color: var(--text-muted);
+        font-size: 14px;
+      }
+
+      /* --- FOOTER --- */
+      footer {
+        text-align: center;
+        padding: 60px 20px;
+        border-top: 1px solid var(--glass-border);
+        color: var(--text-muted);
+      }
+
+      /* --- RESPONSIVE --- */
+      @media (max-width: 900px) {
+        .hero {
+          grid-template-columns: 1fr;
+          text-align: center;
+          padding-top: 40px;
+        }
+        .hero-content {
+          margin-bottom: 50px;
+        }
+        .hero-content p {
+          margin: 0 auto 30px;
+        }
+        .hero-content div {
+          justify-content: center;
+        }
+        .hero-card {
+          justify-content: center;
+        }
+        .nav-links {
+          display: none;
+        }
+        .navbar {
+          padding: 15px 20px;
+        }
+        .hero-content h1 {
+          font-size: 2.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="ambient-glow"></div>
+
+    <nav class="navbar">
+      <div class="brand">
+        <img
+          src="{{ url_for('static', filename='Images/logo0.png') }}"
+          alt="Logo"
+        />
+        Bank of <span>Trust</span>
       </div>
-    </div>
 
-    <div class="hero-card">
-      <div class="login-mini-form">
-        <h3>🚀 Quick Access</h3>
-        <p style="font-size: 13px; color: #94a3b8; margin-top: -5px; margin-bottom: 15px;">
-          Select your portal to continue securely.
+      <ul class="nav-links">
+        <li><a href="#">Personal</a></li>
+        <li><a href="#">Business</a></li>
+        <li><a href="#">Loans</a></li>
+        <li><a href="#">Company</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="{{ url_for('admin_login') }}" class="btn-ghost"
+          >Admin Portal</a
+        >
+        <a href="{{ url_for('login') }}" class="btn-solid">Sign In</a>
+      </div>
+    </nav>
+
+    <header class="hero">
+      <div class="hero-content">
+        <h1>Banking tailored for <br /><span>tomorrow's world.</span></h1>
+        <p>
+          Experience the next generation of financial technology. Zero hidden
+          fees, AI-powered insights, and military-grade security. Welcome to the
+          Bank of Trust.
         </p>
-        
-        <a href="{{ url_for('login') }}" class="btn btn-primary">
-          <i class="ri-user-line"></i> Retail Banking Login
-        </a>
-        
-        <a href="{{ url_for('admin_login') }}" class="btn btn-secondary">
-          <i class="ri-building-2-line"></i> Corporate Login
-        </a>
-
-        <div style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 15px; padding-top: 15px;">
-          <a href="#" style="color: #7c3aed; text-decoration: none; font-size: 13px; font-weight: 600;">Open a new account &rarr;</a>
+        <div style="display: flex; gap: 15px">
+          <a
+            href="{{ url_for('login') }}"
+            class="btn-solid"
+            style="padding: 12px 30px"
+            >Get Started</a
+          >
+          <a href="#features" class="btn-ghost" style="padding: 12px 30px"
+            >Learn More</a
+          >
         </div>
       </div>
-    </div>
-  </header>
 
-  <section class="stats">
-    <div class="stat-item">
-      <h2>2M+</h2>
-      <p>Active Users</p>
-    </div>
-    <div class="stat-item">
-      <h2>₹50B+</h2>
-      <p>Transactions Processed</p>
-    </div>
-    <div class="stat-item">
-      <h2>99.9%</h2>
-      <p>Server Uptime</p>
-    </div>
-    <div class="stat-item">
-      <h2>24/7</h2>
-      <p>AI Support</p>
-    </div>
-  </section>
+      <div class="hero-card">
+        <div class="login-mini-form">
+          <h3>🚀 Quick Access</h3>
+          <p
+            style="
+              font-size: 13px;
+              color: #94a3b8;
+              margin-top: -5px;
+              margin-bottom: 20px;
+            "
+          >
+            Select your portal to continue securely.
+          </p>
 
-  <section class="features" id="features">
-    <div class="feature-card">
-      <div class="icon-box"><i class="ri-shield-check-line" style="color: #7c3aed;"></i></div>
-      <h3>Unmatched Security</h3>
-      <p>We use 256-bit AES encryption and AI fraud detection to keep your assets safe around the clock.</p>
-    </div>
+          <a href="{{ url_for('login') }}" class="btn-block btn-retail">
+            <i class="ri-user-smile-line"></i> Retail Banking Login
+          </a>
 
-    <div class="feature-card">
-      <div class="icon-box"><i class="ri-robot-line" style="color: #38bdf8;"></i></div>
-      <h3>AI Assistant</h3>
-      <p>Chat with our intelligent bot for instant loan approvals, balance checks, and smart insights.</p>
-    </div>
+          <a href="{{ url_for('admin_login') }}" class="btn-block btn-corp">
+            <i class="ri-building-2-line"></i> Corporate Login
+          </a>
 
-    <div class="feature-card">
-      <div class="icon-box"><i class="ri-smartphone-line" style="color: #f43f5e;"></i></div>
-      <h3>Digital First</h3>
-      <p>Open an account in 3 minutes. No paperwork, no queues, just seamless digital banking.</p>
-    </div>
-  </section>
+          <div
+            style="
+              border-top: 1px solid rgba(255, 255, 255, 0.1);
+              margin-top: 15px;
+              padding-top: 15px;
+              text-align: center;
+            "
+          >
+            <a
+              href="#"
+              style="
+                color: var(--primary);
+                text-decoration: none;
+                font-size: 13px;
+                font-weight: 600;
+              "
+            >
+              Open a new account
+              <i class="ri-arrow-right-line" style="vertical-align: middle"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
 
-  <footer>
-    <div style="margin-bottom: 20px;">
-      <img src="{{ url_for('static', filename='Images/logo0.png') }}" style="height: 30px; opacity: 0.7;">
-    </div>
-    <p>&copy; {{ current_year }} Bank of Trust (BOT). All rights reserved.</p>
-    <p style="font-size: 12px; margin-top: 10px;">Licensed by RBI. Partnered with Global FinTech Alliance.</p>
-  </footer>
+    <section class="stats">
+      <div class="stat-item">
+        <h2>2M+</h2>
+        <p>Active Users</p>
+      </div>
+      <div class="stat-item">
+        <h2>₹50B+</h2>
+        <p>Processed</p>
+      </div>
+      <div class="stat-item">
+        <h2>99.9%</h2>
+        <p>Uptime</p>
+      </div>
+      <div class="stat-item">
+        <h2>24/7</h2>
+        <p>AI Support</p>
+      </div>
+    </section>
 
-</body>
+    <section class="features" id="features">
+      <div class="feature-card">
+        <div class="icon-box"><i class="ri-shield-check-line"></i></div>
+        <h3>Unmatched Security</h3>
+        <p>
+          We use 256-bit AES encryption and AI fraud detection to keep your
+          assets safe around the clock.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="icon-box"><i class="ri-robot-line"></i></div>
+        <h3>AI Assistant</h3>
+        <p>
+          Chat with our intelligent bot for instant loan approvals, balance
+          checks, and smart financial insights.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="icon-box"><i class="ri-smartphone-line"></i></div>
+        <h3>Digital First</h3>
+        <p>
+          Open an account in 3 minutes. No paperwork, no queues, just seamless
+          digital banking experiences.
+        </p>
+      </div>
+    </section>
+
+    <footer>
+      <div style="margin-bottom: 20px">
+        <img
+          src="{{ url_for('static', filename='Images/logo0.png') }}"
+          style="height: 35px; opacity: 0.8; filter: grayscale(100%)"
+        />
+      </div>
+      <p>&copy; {{ current_year }} Bank of Trust (BOT). All rights reserved.</p>
+      <p style="font-size: 12px; margin-top: 10px; opacity: 0.6">
+        Licensed by RBI. Partnered with Global FinTech Alliance.
+      </p>
+    </footer>
+  </body>
 </html>

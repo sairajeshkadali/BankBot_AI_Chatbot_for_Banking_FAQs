@@ -2,18 +2,21 @@ import sqlite3
 
 DB_PATH = "bank.db"
 
+
 def get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
+
 
 # ---------------- CREATE DB TABLES ----------------
 def create_db():
     conn = get_db()
     c = conn.cursor()
 
-    # USERS TABLE
-    c.execute("""
+    # 1. USERS TABLE
+    c.execute(
+        """
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             account_number TEXT UNIQUE NOT NULL,
@@ -23,21 +26,28 @@ def create_db():
             phone TEXT,
             balance INTEGER DEFAULT 0
         )
-    """)
+    """
+    )
 
-    # CHAT LOGS TABLE
-    c.execute("""
+    # 2. CHAT LOGS TABLE (Updated for Analytics)
+    c.execute(
+        """
         CREATE TABLE IF NOT EXISTS chat_logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             account TEXT,
             user_message TEXT NOT NULL,
             bot_response TEXT NOT NULL,
+            predicted_intent TEXT,
+            confidence REAL,
+            is_fallback BOOLEAN DEFAULT 0,
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
         )
-    """)
+    """
+    )
 
-    # TRANSACTIONS TABLE
-    c.execute("""
+    # 3. TRANSACTIONS TABLE
+    c.execute(
+        """
         CREATE TABLE IF NOT EXISTS transactions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             sender_account TEXT,
@@ -48,11 +58,24 @@ def create_db():
             status TEXT,
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
         )
-    """)
+    """
+    )
+
+    # 4. KNOWLEDGE BASE / FAQS TABLE
+    c.execute(
+        """
+        CREATE TABLE IF NOT EXISTS faqs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            question TEXT NOT NULL,
+            answer TEXT NOT NULL,
+            category TEXT DEFAULT 'General'
+        )
+    """
+    )
 
     conn.commit()
     conn.close()
-    print("✅ Bank of Trust Database Ready.")
+    print("✅ Bank of Trust Database Ready (Final Schema).")
 
 
 # ---------------- LOGIN CHECK ----------------
@@ -82,10 +105,13 @@ def get_balance(account):
         return user["balance"]
     return None
 
+
 def update_balance(account, new_balance):
     conn = get_db()
     c = conn.cursor()
-    c.execute("UPDATE users SET balance=? WHERE account_number=?", (new_balance, account))
+    c.execute(
+        "UPDATE users SET balance=? WHERE account_number=?", (new_balance, account)
+    )
     conn.commit()
     conn.close()
 
@@ -110,21 +136,29 @@ def transfer_funds(sender_account, receiver_account, amount):
 def record_transaction(sender, receiver, receiver_name, amount, mode, status):
     conn = get_db()
     c = conn.cursor()
-    c.execute("""
+    c.execute(
+        """
         INSERT INTO transactions (sender_account, receiver_account, receiver_name, amount, mode, status)
         VALUES (?, ?, ?, ?, ?, ?)
-    """, (sender, receiver, receiver_name, amount, mode, status))
+    """,
+        (sender, receiver, receiver_name, amount, mode, status),
+    )
     conn.commit()
     conn.close()
 
 
 # ---------------- SAVE CHAT ----------------
-def save_chat(account, user_message, bot_response):
+def save_chat(
+    account, user_message, bot_response, intent=None, confidence=0.0, is_fallback=0
+):
     conn = get_db()
     c = conn.cursor()
     c.execute(
-        "INSERT INTO chat_logs (account, user_message, bot_response) VALUES (?,?,?)",
-        (account, user_message, bot_response)
+        """
+        INSERT INTO chat_logs (account, user_message, bot_response, predicted_intent, confidence, is_fallback) 
+        VALUES (?, ?, ?, ?, ?, ?)
+    """,
+        (account, user_message, bot_response, intent, confidence, is_fallback),
     )
     conn.commit()
     conn.close()
@@ -134,7 +168,8 @@ def save_chat(account, user_message, bot_response):
 def get_transactions(account):
     conn = get_db()
     c = conn.cursor()
-    c.execute("""
+    c.execute(
+        """
         SELECT 
             timestamp,
             sender_account,
@@ -146,14 +181,15 @@ def get_transactions(account):
         FROM transactions
         WHERE sender_account=? OR receiver_account=?
         ORDER BY id DESC
-    """, (account, account))
+    """,
+        (account, account),
+    )
 
     rows = c.fetchall()
     conn.close()
 
     formatted = []
     for t in rows:
-        # Determine Transaction Type
         if t["sender_account"] == account:
             txn_type = f"Sent to {t['receiver_name']}"
         else:
@@ -161,17 +197,24 @@ def get_transactions(account):
             sender_name = sender["name"] if sender else "Unknown"
             txn_type = f"Received from {sender_name}"
 
-        formatted.append({
-            "date": t["timestamp"],     
-            "type": txn_type,
-            "amount": t["amount"],
-            "mode": t["mode"],          
-            "status": t["status"]
-        })
+        formatted.append(
+            {
+                "date": t["timestamp"],
+                "type": txn_type,
+                "amount": t["amount"],
+                "mode": t["mode"],
+                "status": t["status"],
+            }
+        )
 
     return formatted
 
-# ---------------- ADMIN METRICS ----------------
+
+# ==========================================
+#  MISSING ADMIN HELPER FUNCTIONS (Restored)
+# ==========================================
+
+
 def get_total_queries():
     conn = get_db()
     c = conn.cursor()
@@ -180,24 +223,95 @@ def get_total_queries():
     conn.close()
     return total
 
+
 def get_total_intents():
     conn = get_db()
     c = conn.cursor()
-    c.execute("SELECT COUNT(DISTINCT bot_response) FROM chat_logs")
+    # Count unique non-null intents
+    c.execute(
+        "SELECT COUNT(DISTINCT predicted_intent) FROM chat_logs WHERE predicted_intent IS NOT NULL"
+    )
     total = c.fetchone()[0]
     conn.close()
     return total
 
+
 def get_recent_chats(limit=5):
     conn = get_db()
     c = conn.cursor()
-    c.execute("""
-        SELECT account, user_message, bot_response, timestamp
-        FROM chat_logs ORDER BY id DESC LIMIT ?
-    """, (limit,))
+    c.execute(
+        """
+        SELECT account, user_message, bot_response, timestamp 
+        FROM chat_logs 
+        ORDER BY id DESC LIMIT ?
+    """,
+        (limit,),
+    )
     rows = c.fetchall()
     conn.close()
     return rows
+
+
+# ==========================================
+#  NEW MILESTONE 4 ANALYTICS
+# ==========================================
+
+
+def get_analytics_stats():
+    """Returns a dictionary of stats for the Admin Dashboard."""
+    conn = get_db()
+    c = conn.cursor()
+
+    # 1. Total Queries
+    c.execute("SELECT COUNT(*) FROM chat_logs")
+    total_queries = c.fetchone()[0]
+
+    # 2. Success Rate (Confidence > 0.65 and not fallback)
+    c.execute(
+        "SELECT COUNT(*) FROM chat_logs WHERE confidence > 0.65 AND is_fallback=0"
+    )
+    successful = c.fetchone()[0]
+    success_rate = (
+        round((successful / total_queries * 100), 1) if total_queries > 0 else 0
+    )
+
+    # 3. Top Intents
+    c.execute(
+        """
+        SELECT predicted_intent, COUNT(*) as count 
+        FROM chat_logs 
+        WHERE predicted_intent IS NOT NULL AND predicted_intent != 'fallback'
+        GROUP BY predicted_intent 
+        ORDER BY count DESC LIMIT 5
+    """
+    )
+    top_intents = c.fetchall()
+
+    conn.close()
+    return {
+        "total": total_queries,
+        "success_rate": success_rate,
+        "top_intents": top_intents,
+    }
+
+
+# --- FAQ MANAGEMENT ---
+def add_faq(question, answer):
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("INSERT INTO faqs (question, answer) VALUES (?, ?)", (question, answer))
+    conn.commit()
+    conn.close()
+
+
+def get_all_faqs():
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT * FROM faqs ORDER BY id DESC")
+    rows = c.fetchall()
+    conn.close()
+    return rows
+
 
 if __name__ == "__main__":
     create_db()

@@ -2,320 +2,579 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard - Bank of Trust</title>
+
+    <!-- Fonts & Icons -->
     <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
-      href="{{ url_for('static', filename='css/admin_style.css') }}"
     />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+
     <style>
-      /* =================================
-       CRITICAL LAYOUT & Z-INDEX FIXES
-       ================================= */
-      body {
-        margin: 0;
-        overflow-x: hidden;
+      :root {
+        /* Neo-FinTech Purple Theme Variables */
+        --bg-dark: #0f172a; /* Deep Slate */
+        --bg-card: #1e293b; /* Lighter Slate */
+        --bg-hover: #334155;
+
+        --primary: #8b5cf6; /* Electric Purple */
+        --primary-dark: #7c3aed;
+        --accent: #c084fc; /* Lavender */
+        --success: #10b981; /* Emerald */
+        --error: #ef4444;
+
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+
+        --border: rgba(255, 255, 255, 0.08);
+        --glass-bg: rgba(30, 41, 59, 0.7);
+        --glass-border: rgba(255, 255, 255, 0.08);
       }
 
-      /* Header (Layer 100) */
+      /* --- GLOBAL LAYOUT --- */
+      body {
+        margin: 0;
+        font-family: "Inter", sans-serif;
+        background-color: var(--bg-dark);
+        color: var(--text-main);
+        overflow-x: hidden;
+        background-image: radial-gradient(
+            circle at 10% 20%,
+            rgba(139, 92, 246, 0.05) 0%,
+            transparent 40%
+          ),
+          radial-gradient(
+            circle at 90% 80%,
+            rgba(16, 185, 129, 0.05) 0%,
+            transparent 40%
+          );
+      }
+
+      /* --- TOPBAR (GLASSMORPHISM) --- */
       .topbar {
-        display: flex !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-        padding: 15px 40px !important;
-        background: rgba(30, 41, 59, 0.95);
-        backdrop-filter: blur(10px);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 40px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--glass-border);
         position: sticky;
         top: 0;
         z-index: 100;
-        width: 100%;
-        box-sizing: border-box;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
       }
 
       .brand {
         display: flex;
         align-items: center;
-        gap: 15px;
+        gap: 12px;
+      }
+      .logo {
+        width: 40px;
+        filter: drop-shadow(0 0 5px rgba(139, 92, 246, 0.5));
+      }
+      .bank-name {
+        font-size: 20px;
+        font-weight: 700;
+        margin: 0;
+        letter-spacing: -0.5px;
+        color: var(--text-main);
+      }
+      .bank-name span {
+        color: var(--primary);
       }
 
-      /* Dashboard Container */
+      .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 25px;
+      }
+
+      .nav-link {
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        transition: 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .nav-link:hover {
+        color: var(--accent);
+      }
+
+      .btn-logout {
+        background: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--primary-dark) 100%
+        );
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 50px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .btn-logout:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+      }
+
+      /* --- DASHBOARD CONTENT --- */
       .dashboard-wrap {
         padding: 40px;
         max-width: 1200px;
         margin: 0 auto;
       }
 
-      .welcome-text {
-        font-size: 28px;
-        color: var(--text-main);
-        font-weight: 700;
-        margin-bottom: 30px;
-      }
-      .welcome-text span {
-        color: var(--primary);
+      .welcome-section {
+        margin-bottom: 40px;
       }
 
-      /* Stats Grid */
+      .welcome-text {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      /* Fix: Isolate gradient to text only so Emoji stays colored */
+      .text-gradient {
+        background: linear-gradient(to right, #fff, #94a3b8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .wave-emoji {
+        display: inline-block;
+        animation: wave 2.5s infinite;
+        transform-origin: 70% 70%;
+      }
+
+      @keyframes wave {
+        0% {
+          transform: rotate(0deg);
+        }
+        10% {
+          transform: rotate(14deg);
+        }
+        20% {
+          transform: rotate(-8deg);
+        }
+        30% {
+          transform: rotate(14deg);
+        }
+        40% {
+          transform: rotate(-4deg);
+        }
+        50% {
+          transform: rotate(10deg);
+        }
+        60% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(0deg);
+        }
+      }
+
+      .date-badge {
+        font-size: 13px;
+        color: var(--text-muted);
+        background: rgba(255, 255, 255, 0.05);
+        padding: 4px 10px;
+        border-radius: 20px;
+        display: inline-block;
+      }
+
+      /* --- STATS GRID --- */
       .stats-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 25px;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 20px;
         margin-bottom: 40px;
       }
 
       .stat-card {
         background: var(--bg-card);
-        padding: 25px;
-        border-radius: 15px;
         border: 1px solid var(--border);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        transition: transform 0.3s ease;
+        border-radius: 16px;
+        padding: 25px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
       }
       .stat-card:hover {
         transform: translateY(-5px);
         border-color: var(--primary);
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+      }
+
+      .stat-icon {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 24px;
+        color: rgba(148, 163, 184, 0.2);
+        transition: 0.3s;
+      }
+      .stat-card:hover .stat-icon {
+        color: rgba(139, 92, 246, 0.4);
+        transform: scale(1.1);
       }
 
       .stat-label {
-        color: var(--text-muted);
-        font-size: 13px;
+        font-size: 12px;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 0.5px;
+        color: var(--text-muted);
         margin-bottom: 10px;
-      }
-      .stat-value {
-        font-size: 28px;
-        color: var(--text-main);
-        font-weight: 700;
-      }
-      .stat-value.balance {
-        color: var(--success);
-        text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+        font-weight: 600;
       }
 
-      /* Transaction Table */
+      .stat-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--text-main);
+      }
+
+      .balance-val {
+        color: var(--success);
+        text-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+      }
+
+      .stat-sub {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-top: 5px;
+      }
+
+      /* --- TRANSACTION TABLE --- */
       .txn-container {
         background: var(--bg-card);
-        border-radius: 15px;
-        padding: 30px;
         border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 0;
+        overflow: hidden; /* For rounded corners on table */
+        box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.3);
       }
+
       .txn-header {
-        font-size: 20px;
-        color: var(--text-main);
-        margin-bottom: 25px;
+        padding: 25px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .txn-title {
+        font-size: 18px;
         font-weight: 600;
-        border-left: 4px solid var(--primary);
-        padding-left: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .txn-title i {
+        color: var(--primary);
       }
 
       table {
         width: 100%;
         border-collapse: collapse;
       }
+
       th {
         text-align: left;
+        background: rgba(15, 23, 42, 0.5);
         color: var(--text-muted);
-        padding: 15px;
-        font-size: 13px;
-        border-bottom: 1px solid var(--border);
+        font-size: 12px;
         text-transform: uppercase;
+        padding: 15px 25px;
+        font-weight: 600;
+        border-bottom: 1px solid var(--border);
       }
+
       td {
-        padding: 15px;
-        color: var(--text-main);
+        padding: 16px 25px;
+        border-bottom: 1px solid var(--border);
         font-size: 14px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        color: var(--text-main);
       }
+
       tr:last-child td {
         border-bottom: none;
       }
       tr:hover td {
-        background: rgba(255, 255, 255, 0.02);
+        background: var(--bg-hover);
       }
 
-      /* Chat Button (Layer 2001) */
+      .status-pill {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        background: rgba(16, 185, 129, 0.15);
+        color: var(--success);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        display: inline-block;
+      }
+
+      /* --- CHAT WIDGET (RE-DESIGNED) --- */
       #bot-trigger {
         position: fixed;
         bottom: 30px;
         right: 30px;
-        width: 65px;
-        height: 65px;
-        background: var(--primary);
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--primary-dark) 100%
+        );
         border-radius: 50%;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 10px 25px rgba(139, 92, 246, 0.5);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 32px;
-        box-shadow: 0 10px 30px rgba(124, 58, 237, 0.5);
-        cursor: pointer;
-        border: none;
-        transition: 0.3s;
+        font-size: 28px;
+        color: white;
         z-index: 2001;
-        animation: bounceIn 1s;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       }
+
       #bot-trigger:hover {
         transform: scale(1.1) rotate(10deg);
-        background: #6d28d9;
+        box-shadow: 0 15px 35px rgba(139, 92, 246, 0.6);
       }
 
-      /* Chat Popup (Layer 2000) - RESIZED */
       #chat-frame {
         position: fixed;
-        bottom: 110px;
+        bottom: 100px;
         right: 30px;
         width: 380px;
-
-        /* ✅ CHANGED: Smaller height + Safety limit */
-        height: 500px;
-        max-height: 70vh; /* Ensures it never exceeds 70% of screen height */
-
+        height: 550px;
+        max-height: 70vh;
         background: var(--bg-card);
         border: 1px solid var(--border);
-        border-radius: 16px;
-        display: none;
+        border-radius: 20px;
+        display: none; /* Hidden by default */
         overflow: hidden;
-        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
         z-index: 2000;
-        backdrop-filter: blur(20px);
+        animation: slideUp 0.3s ease-out;
       }
+
       iframe {
         width: 100%;
         height: 100%;
         border: none;
       }
 
-      @keyframes bounceIn {
-        0% {
-          transform: scale(0);
+      @keyframes slideUp {
+        from {
           opacity: 0;
+          transform: translateY(20px);
         }
-        60% {
-          transform: scale(1.1);
+        to {
           opacity: 1;
+          transform: translateY(0);
         }
-        100% {
-          transform: scale(1);
+      }
+
+      /* Mobile Responsive */
+      @media (max-width: 768px) {
+        .topbar {
+          padding: 15px 20px;
         }
+        .dashboard-wrap {
+          padding: 20px;
+        }
+        #chat-frame {
+          width: 90%;
+          right: 5%;
+          bottom: 100px;
+        }
+        .nav-actions span {
+          display: none;
+        } /* Hide 'History' text on mobile if needed */
       }
     </style>
   </head>
-
   <body>
+    <!-- NAVBAR -->
     <header class="topbar">
       <div class="brand">
         <img
           src="{{ url_for('static', filename='Images/logo0.png') }}"
           class="logo"
+          alt="Bank Logo"
         />
         <h1 class="bank-name">Bank of <span>Trust</span></h1>
       </div>
-      <div style="display: flex; align-items: center; gap: 25px">
-        <a
-          href="/chat_logs"
-          style="
-            color: #94a3b8;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-            transition: 0.3s;
-          "
-          >History</a
-        >
-        <button
-          class="btn blue"
-          style="
-            width: auto;
-            padding: 10px 25px;
-            margin: 0;
-            border-radius: 50px;
-          "
-          onclick="location.href='/logout'"
-        >
-          Logout
+      <div class="nav-actions">
+        <a href="/chat_logs" class="nav-link">
+          <i class="fas fa-history"></i> History
+        </a>
+        <button class="btn-logout" onclick="location.href='/logout'">
+          <i class="fas fa-sign-out-alt"></i> Logout
         </button>
       </div>
     </header>
 
+    <!-- MAIN DASHBOARD -->
     <div class="dashboard-wrap">
-      <div class="welcome-text">👋 Welcome back, <span>{{ name }}</span></div>
+      <div class="welcome-section">
+        <div class="welcome-text">
+          <span class="wave-emoji">👋</span>
+          <span class="text-gradient">Welcome back, {{ name }}</span>
+        </div>
+        <div class="date-badge">
+          <i class="far fa-clock"></i> Secure Session Active
+        </div>
+      </div>
 
+      <!-- STATS GRID -->
       <div class="stats-grid">
+        <!-- Balance Card -->
         <div class="stat-card">
+          <i class="fas fa-wallet stat-icon"></i>
           <div class="stat-label">Total Balance</div>
-          <div class="stat-value balance">₹{{ balance }}</div>
+          <div class="stat-value balance-val">₹{{ balance }}</div>
+          <div class="stat-sub">Available Funds</div>
         </div>
+
+        <!-- Account Card -->
         <div class="stat-card">
+          <i class="fas fa-id-card stat-icon"></i>
           <div class="stat-label">Account Number</div>
-          <div class="stat-value">{{ account }}</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Branch Details</div>
-          <div class="stat-value" style="font-size: 16px">
-            IFSC: BOT000123<br />
-            <span style="color: var(--text-muted); font-size: 13px"
-              >Hyderabad Main</span
-            >
+          <div
+            class="stat-value"
+            style="font-size: 20px; font-family: monospace"
+          >
+            {{ account }}
           </div>
+          <div class="stat-sub">Savings Account</div>
         </div>
+
+        <!-- Branch Card -->
         <div class="stat-card">
+          <i class="fas fa-building-columns stat-icon"></i>
+          <div class="stat-label">Branch Details</div>
+          <div class="stat-value" style="font-size: 16px; margin-top: 12px">
+            IFSC: <span style="color: var(--text-muted)">BOT000123</span>
+          </div>
+          <div class="stat-sub">Hyderabad Main Branch</div>
+        </div>
+
+        <!-- Profile Card -->
+        <div class="stat-card">
+          <i class="fas fa-user-shield stat-icon"></i>
           <div class="stat-label">Profile Status</div>
           <div
             class="stat-value"
-            style="font-size: 16px; color: var(--success)"
+            style="font-size: 16px; margin-top: 12px; color: var(--success)"
           >
-            ✅ KYC Verified<br />
-            <span style="font-size: 12px; color: var(--text-muted)"
-              >{{ email }}</span
-            >
+            <i class="fas fa-check-circle"></i> KYC Verified
           </div>
+          <div class="stat-sub">{{ email }}</div>
         </div>
       </div>
 
+      <!-- TRANSACTION TABLE -->
       <div class="txn-container">
-        <div class="txn-header">Recent Transactions</div>
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Description</th>
-              <th>Mode</th>
-              <th>Amount</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for t in transactions %}
-            <tr>
-              <td>{{ t.date }}</td>
-              <td>{{ t.type }}</td>
-              <td>{{ t.mode }}</td>
-              <td>₹{{ t.amount }}</td>
-              <td style="color: var(--success); font-weight: 600">
-                {{ t.status }}
-              </td>
-            </tr>
-            {% else %}
-            <tr>
-              <td
-                colspan="5"
-                style="
-                  text-align: center;
-                  color: var(--text-muted);
-                  padding: 30px;
-                "
-              >
-                No transactions found. Start chatting to make a transfer!
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+        <div class="txn-header">
+          <div class="txn-title">
+            <i class="fas fa-exchange-alt"></i> Recent Transactions
+          </div>
+          <div style="font-size: 13px; color: var(--text-muted)">
+            Last 5 Activities
+          </div>
+        </div>
+
+        <div style="overflow-x: auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Mode</th>
+                <th>Amount</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for t in transactions %}
+              <tr>
+                <td style="color: var(--text-muted); font-size: 13px">
+                  {{ t.date }}
+                </td>
+                <td style="font-weight: 500">{{ t.type }}</td>
+                <td>
+                  <span
+                    style="
+                      font-size: 12px;
+                      background: rgba(255, 255, 255, 0.05);
+                      padding: 2px 6px;
+                      border-radius: 4px;
+                    "
+                    >{{ t.mode }}</span
+                  >
+                </td>
+                <td style="font-weight: 700">₹{{ t.amount }}</td>
+                <td>
+                  <!-- Using Jinja variable inside status pill -->
+                  <span class="status-pill">{{ t.status }}</span>
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td
+                  colspan="5"
+                  style="
+                    text-align: center;
+                    padding: 40px;
+                    color: var(--text-muted);
+                  "
+                >
+                  <i
+                    class="fas fa-inbox"
+                    style="
+                      font-size: 32px;
+                      margin-bottom: 10px;
+                      display: block;
+                      opacity: 0.5;
+                    "
+                  ></i>
+                  No transactions found yet. Start chatting to make a transfer!
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <button id="bot-trigger">🤖</button>
+    <!-- CHAT WIDGET -->
+    <button id="bot-trigger"><i class="fas fa-robot"></i></button>
+
     <div id="chat-frame">
       <iframe src="/chat"></iframe>
     </div>
@@ -323,14 +582,18 @@
     <script>
       const btn = document.getElementById("bot-trigger");
       const frame = document.getElementById("chat-frame");
+      const icon = btn.querySelector("i");
 
       btn.onclick = () => {
         if (frame.style.display === "block") {
           frame.style.display = "none";
-          btn.innerHTML = "🤖";
+          icon.className = "fas fa-robot";
+          btn.style.background =
+            "linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)";
         } else {
           frame.style.display = "block";
-          btn.innerHTML = "❌";
+          icon.className = "fas fa-times";
+          btn.style.background = "#ef4444"; // Red for close action
         }
       };
     </script>

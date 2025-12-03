@@ -2,130 +2,333 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Login - Bank of Trust</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Secure Login - Bank of Trust</title>
     <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
-      href="{{ url_for('static', filename='css/admin_style.css') }}"
     />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+
     <style>
-      /* Specific overrides for the Login Page layout */
+      :root {
+        /* Neo-FinTech Purple Theme */
+        --bg-dark: #0f172a;
+        --primary: #8b5cf6;
+        --primary-dark: #7c3aed;
+        --accent: #c084fc;
+        --error: #ef4444;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --glass-border: rgba(255, 255, 255, 0.08);
+        --glass-bg: rgba(30, 41, 59, 0.6);
+      }
+
       body {
+        margin: 0;
+        height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 100vh;
-        margin: 0;
-        /* Deep Void Gradient Background */
-        background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+        background-color: var(--bg-dark);
         font-family: "Inter", sans-serif;
+        overflow: hidden;
+        position: relative;
       }
 
-      .auth-box {
-        width: 400px;
+      /* Ambient Background Animation */
+      body::before {
+        content: "";
+        position: absolute;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(
+          circle,
+          rgba(139, 92, 246, 0.15) 0%,
+          transparent 70%
+        );
+        top: -100px;
+        left: -100px;
+        border-radius: 50%;
+        animation: float 10s infinite alternate;
+        z-index: -1;
+      }
+      body::after {
+        content: "";
+        position: absolute;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(
+          circle,
+          rgba(192, 132, 252, 0.1) 0%,
+          transparent 70%
+        );
+        bottom: -50px;
+        right: -50px;
+        border-radius: 50%;
+        animation: float 12s infinite alternate-reverse;
+        z-index: -1;
+      }
+
+      @keyframes float {
+        0% {
+          transform: translate(0, 0);
+        }
+        100% {
+          transform: translate(30px, 30px);
+        }
+      }
+
+      .login-card {
+        width: 100%;
+        max-width: 420px;
         padding: 40px;
-        /* Glassmorphism Effect */
-        background: rgba(30, 41, 59, 0.7);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 20px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-      }
-
-      .auth-header {
         text-align: center;
-        margin-bottom: 30px;
+        position: relative;
       }
 
-      /* Logo styling */
-      .auth-header img {
-        width: 70px;
-        margin-bottom: 15px;
-        filter: drop-shadow(0 0 10px rgba(124, 58, 237, 0.3));
+      /* Top Accent Line */
+      .login-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 30%;
+        height: 4px;
+        background: var(--primary);
+        border-radius: 0 0 10px 10px;
+        box-shadow: 0 0 15px var(--primary);
       }
 
-      .auth-header h2 {
-        margin: 0;
-        font-size: 24px;
-        color: #f8fafc;
+      .brand-logo {
+        width: 64px;
+        height: 64px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+        border: 1px solid var(--glass-border);
+      }
+      .brand-logo img {
+        width: 40px;
+        filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.5));
+      }
+
+      h2 {
+        margin: 0 0 8px 0;
+        color: var(--text-main);
         font-weight: 700;
+        font-size: 24px;
+        letter-spacing: -0.5px;
+      }
+
+      p.subtitle {
+        margin: 0 0 30px 0;
+        color: var(--text-muted);
+        font-size: 14px;
+      }
+
+      .input-group {
+        position: relative;
+        margin-bottom: 20px;
+        text-align: left;
+      }
+
+      .input-group label {
+        display: block;
+        color: var(--text-muted);
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        margin-left: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .input-wrapper {
+        position: relative;
+      }
+
+      .input-wrapper i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 14px;
+        transition: 0.3s;
       }
 
       input {
         width: 100%;
-        padding: 12px 15px;
-        margin-bottom: 15px;
-        /* Input fields blend with the dark theme */
+        padding: 14px 14px 14px 40px; /* Space for icon */
         background: rgba(15, 23, 42, 0.6);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
         color: white;
         font-size: 15px;
-        outline: none;
-        transition: 0.3s;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+        font-family: inherit;
       }
 
-      /* Glow effect on focus */
       input:focus {
-        border-color: #7c3aed;
-        box-shadow: 0 0 10px rgba(124, 58, 237, 0.2);
+        border-color: var(--primary);
+        background: rgba(15, 23, 42, 0.9);
+        box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
+        outline: none;
       }
 
-      /* Flash Messages (Errors) */
+      input:focus + i {
+        color: var(--primary);
+      }
+
+      .btn-login {
+        width: 100%;
+        padding: 14px;
+        margin-top: 10px;
+        background: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--primary-dark) 100%
+        );
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px -5px rgba(124, 58, 237, 0.4);
+      }
+
+      .btn-login:active {
+        transform: translateY(0);
+      }
+
+      /* Flash Messages */
+      .flash-container {
+        margin-bottom: 20px;
+      }
       .flash-msg {
-        background: rgba(239, 68, 68, 0.2);
-        color: #fca5a5;
-        padding: 10px;
-        border-radius: 8px;
-        margin-bottom: 15px;
-        font-size: 14px;
-        text-align: center;
+        background: rgba(239, 68, 68, 0.15);
         border: 1px solid rgba(239, 68, 68, 0.3);
+        color: #fca5a5;
+        padding: 12px;
+        border-radius: 10px;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
       }
 
-      /* Back Link Hover Effect */
-      .back-link {
-        color: #94a3b8;
+      .footer-links {
+        margin-top: 25px;
         font-size: 13px;
+      }
+      .footer-links a {
+        color: var(--text-muted);
         text-decoration: none;
         transition: 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
       }
-      .back-link:hover {
-        color: #7c3aed;
+      .footer-links a:hover {
+        color: var(--accent);
+      }
+
+      /* Mobile Responsive */
+      @media (max-width: 480px) {
+        .login-card {
+          padding: 30px 20px;
+          max-width: 90%;
+        }
       }
     </style>
   </head>
   <body>
-    <div class="auth-box">
-      <div class="auth-header">
+    <div class="login-card">
+      <!-- Logo -->
+      <div class="brand-logo">
         <img
           src="{{ url_for('static', filename='Images/logo0.png') }}"
-          alt="Logo"
+          alt="Bot Logo"
         />
-        <h2>Bank of Trust</h2>
-        <p style="color: #94a3b8; font-size: 14px; margin-top: 5px">
-          Retail Banking Portal
-        </p>
       </div>
 
-      {% with messages = get_flashed_messages() %} {% if messages %} {% for
-      message in messages %}
-      <div class="flash-msg">{{ message }}</div>
-      {% endfor %} {% endif %} {% endwith %}
+      <h2>Welcome Back</h2>
+      <p class="subtitle">Secure access to Bank of Trust</p>
 
+      <!-- Error Messages -->
+      {% with messages = get_flashed_messages() %} {% if messages %}
+      <div class="flash-container">
+        {% for message in messages %}
+        <div class="flash-msg">
+          <i class="fas fa-exclamation-circle"></i> {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %} {% endwith %}
+
+      <!-- Login Form -->
       <form action="/login" method="post">
-        <input name="email" type="email" placeholder="Email Address" required />
-        <input
-          name="password"
-          type="password"
-          placeholder="Password"
-          required
-        />
+        <div class="input-group">
+          <label>Account Identity</label>
+          <div class="input-wrapper">
+            <input
+              name="email"
+              type="email"
+              placeholder="name@example.com"
+              required
+              autocomplete="email"
+            />
+            <i class="fas fa-envelope"></i>
+          </div>
+        </div>
 
-        <button class="btn red" type="submit">Secure Login</button>
+        <div class="input-group">
+          <label>Access Key</label>
+          <div class="input-wrapper">
+            <input
+              name="password"
+              type="password"
+              placeholder="••••••••"
+              required
+            />
+            <i class="fas fa-lock"></i>
+          </div>
+        </div>
+
+        <button class="btn-login" type="submit">
+          Access Dashboard
+          <i
+            class="fas fa-arrow-right"
+            style="margin-left: 8px; font-size: 14px"
+          ></i>
+        </button>
       </form>
 
-      <div style="text-align: center; margin-top: 20px">
-        <a href="/" class="back-link">&larr; Back to Home</a>
+      <div class="footer-links">
+        <a href="/"> <i class="fas fa-chevron-left"></i> Back to Main Site </a>
       </div>
     </div>
   </body>

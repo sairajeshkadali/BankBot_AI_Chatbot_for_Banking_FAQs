@@ -1,177 +1,431 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <title>Chat History - Bank of Trust</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_style.css') }}">
-  <style>
-    /* =================================
-       CRITICAL LAYOUT FIXES
-       ================================= */
-    body {
-      margin: 0;
-      overflow-x: hidden;
-    }
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat History - Bank of Trust</title>
 
-    /* Force Header Layout */
-    .topbar {
-      display: flex !important;
-      justify-content: space-between !important;
-      align-items: center !important;
-      padding: 15px 40px !important; /* Adds space from edges */
-      background: rgba(30, 41, 59, 0.95);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      width: 100%;
-      box-sizing: border-box;
-    }
+    <!-- Fonts & Icons -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
+    <style>
+      :root {
+        /* Neo-FinTech Purple Theme */
+        --bg-dark: #0f172a;
+        --bg-card: #1e293b;
+        --bg-hover: #334155;
 
-    .contact {
-        text-align: right;
-    }
+        --primary: #8b5cf6;
+        --primary-dark: #7c3aed;
+        --accent: #c084fc;
 
-    /* Page Layout */
-    .history-container {
-      max-width: 1000px;
-      margin: 40px auto;
-      padding: 0 20px;
-    }
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
 
-    .toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 25px;
-      background: var(--bg-card);
-      padding: 15px 25px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-    }
+        --border: rgba(255, 255, 255, 0.08);
+        --glass-bg: rgba(30, 41, 59, 0.7);
+        --glass-border: rgba(255, 255, 255, 0.08);
+      }
 
-    .toolbar h2 { margin: 0; font-size: 20px; color: var(--text-main); }
+      body {
+        margin: 0;
+        font-family: "Inter", sans-serif;
+        background-color: var(--bg-dark);
+        color: var(--text-main);
+        overflow-x: hidden;
+        background-image: radial-gradient(
+            circle at 10% 20%,
+            rgba(139, 92, 246, 0.05) 0%,
+            transparent 40%
+          ),
+          radial-gradient(
+            circle at 90% 80%,
+            rgba(16, 185, 129, 0.05) 0%,
+            transparent 40%
+          );
+      }
 
-    .search-box input {
-      background: rgba(2, 6, 23, 0.6);
-      border: 1px solid var(--border);
-      padding: 10px 15px;
-      border-radius: 8px;
-      color: white;
-      width: 250px;
-      outline: none;
-    }
-    .search-box input:focus { border-color: var(--primary); }
+      /* --- TOPBAR --- */
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 40px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--glass-border);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      }
 
-    .btn-export {
-      background: var(--primary);
-      color: white;
-      padding: 10px 20px;
-      text-decoration: none;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 14px;
-      transition: 0.3s;
-    }
-    .btn-export:hover { background: var(--primary-hover); box-shadow: 0 0 15px var(--primary-glow); }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .logo {
+        width: 40px;
+        filter: drop-shadow(0 0 5px rgba(139, 92, 246, 0.5));
+      }
+      .bank-name {
+        font-size: 20px;
+        font-weight: 700;
+        margin: 0;
+        letter-spacing: -0.5px;
+        color: var(--text-main);
+      }
+      .bank-name span {
+        color: var(--primary);
+      }
 
-    .back-link {
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 14px;
-      display: inline-flex;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-    .back-link:hover { color: var(--primary); }
+      .user-badge {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 6px 15px;
+        border-radius: 50px;
+        border: 1px solid var(--border);
+      }
+      .user-icon {
+        width: 32px;
+        height: 32px;
+        background: var(--primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        color: white;
+      }
+      .user-info {
+        display: flex;
+        flex-direction: column;
+      }
+      .user-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-main);
+      }
+      .user-label {
+        font-size: 11px;
+        color: var(--text-muted);
+      }
 
-    /* History Table */
-    .log-card {
-      background: var(--bg-card);
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      overflow: hidden;
-    }
+      /* --- MAIN CONTENT --- */
+      .history-container {
+        max-width: 1100px;
+        margin: 40px auto;
+        padding: 0 20px;
+      }
 
-    table { width: 100%; border-collapse: collapse; }
-    th { background: rgba(0,0,0,0.2); padding: 15px 25px; text-align: left; color: var(--primary); font-size: 13px; font-weight: 600; }
-    td { padding: 20px 25px; border-bottom: 1px solid var(--border); color: var(--text-main); font-size: 14px; line-height: 1.5; }
-    tr:hover td { background: rgba(255,255,255,0.02); }
-    
-    .time-stamp { color: var(--text-muted); font-size: 12px; white-space: nowrap; }
-    .bot-reply { color: #cbd5e1; }
-  </style>
-</head>
-<body>
+      .header-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 25px;
+      }
 
-  <header class="topbar">
-    <div class="brand">
-      <img src="{{ url_for('static', filename='Images/logo0.png') }}" class="logo">
-      <h1 class="bank-name">Bank of <span>Trust</span></h1>
-    </div>
-    <div class="contact">
-      <p style="margin:0; font-size:12px; color:#94a3b8;">Logged in as</p>
-      <strong style="font-size:16px; color:#7c3aed;">{{ session.get('name', 'User') }}</strong>
-    </div>
-  </header>
+      .page-title h2 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 700;
+      }
+      .page-title p {
+        margin: 5px 0 0;
+        color: var(--text-muted);
+        font-size: 14px;
+      }
 
-  <div class="history-container">
-    <a href="/dashboard" class="back-link">&larr; Back to Dashboard</a>
+      .back-btn {
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: 0.3s;
+        padding: 8px 16px;
+        border-radius: 8px;
+        border: 1px solid transparent;
+      }
+      .back-btn:hover {
+        color: var(--text-main);
+        background: rgba(255, 255, 255, 0.05);
+        border-color: var(--border);
+      }
 
-    <div class="toolbar">
-      <h2>🗂️ Conversation Archives</h2>
-      <div style="display: flex; gap: 15px;">
-        <div class="search-box">
-          <input type="text" id="search" placeholder="Search logs...">
+      /* --- CONTROLS CARD --- */
+      .toolbar {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+      }
+
+      .search-wrapper {
+        position: relative;
+        width: 350px;
+      }
+      .search-wrapper i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+      }
+      .search-input {
+        width: 100%;
+        background: var(--bg-dark);
+        border: 1px solid var(--border);
+        padding: 12px 12px 12px 40px;
+        border-radius: 10px;
+        color: white;
+        outline: none;
+        transition: 0.3s;
+        font-family: inherit;
+      }
+      .search-input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+      }
+
+      .btn-export {
+        background: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--primary-dark) 100%
+        );
+        color: white;
+        text-decoration: none;
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+      .btn-export:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(139, 92, 246, 0.4);
+      }
+
+      /* --- LOG TABLE --- */
+      .log-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.3);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th {
+        background: rgba(15, 23, 42, 0.5);
+        padding: 18px 25px;
+        text-align: left;
+        color: var(--text-muted);
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--border);
+      }
+
+      td {
+        padding: 20px 25px;
+        border-bottom: 1px solid var(--border);
+        font-size: 14px;
+        vertical-align: top;
+        line-height: 1.6;
+      }
+
+      tr:last-child td {
+        border-bottom: none;
+      }
+      tr:hover td {
+        background: var(--bg-hover);
+      }
+
+      /* Specific Column Styles */
+      .user-msg {
+        color: var(--text-main);
+        font-weight: 500;
+      }
+
+      .bot-msg {
+        color: #d1d5db; /* Softer grey */
+        position: relative;
+        padding-left: 15px;
+        border-left: 2px solid var(--primary);
+      }
+
+      .timestamp {
+        color: var(--text-muted);
+        font-size: 12px;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .timestamp i {
+        color: var(--accent);
+        opacity: 0.7;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .topbar {
+          padding: 15px 20px;
+        }
+        .toolbar {
+          flex-direction: column;
+          gap: 15px;
+          align-items: stretch;
+        }
+        .search-wrapper {
+          width: 100%;
+        }
+        .btn-export {
+          justify-content: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- NAVBAR -->
+    <header class="topbar">
+      <div class="brand">
+        <img
+          src="{{ url_for('static', filename='Images/logo0.png') }}"
+          class="logo"
+          alt="Bank Logo"
+        />
+        <h1 class="bank-name">Bank of <span>Trust</span></h1>
+      </div>
+
+      <!-- User Badge -->
+      <div class="user-badge">
+        <div class="user-info">
+          <span class="user-name">{{ session.get('name', 'User') }}</span>
+          <span class="user-label">Logged In</span>
         </div>
-        <a href="/export_excel" class="btn-export">Download Excel</a>
+        <div class="user-icon">
+          <i class="fas fa-user"></i>
+        </div>
+      </div>
+    </header>
+
+    <div class="history-container">
+      <!-- Header Section -->
+      <div class="header-section">
+        <div class="page-title">
+          <h2>Conversation Archives</h2>
+          <p>Review your past interactions with the banking assistant.</p>
+        </div>
+        <a href="/dashboard" class="back-btn">
+          <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="search-wrapper">
+          <i class="fas fa-search"></i>
+          <input
+            type="text"
+            id="search"
+            class="search-input"
+            placeholder="Search message content..."
+          />
+        </div>
+        <a href="/export_excel" class="btn-export">
+          <i class="fas fa-file-excel"></i> Download Excel Report
+        </a>
+      </div>
+
+      <!-- Table Card -->
+      <div class="log-card">
+        <div style="overflow-x: auto">
+          <table id="logTable">
+            <thead>
+              <tr>
+                <th width="35%">Your Message</th>
+                <th width="45%">Assistant Response</th>
+                <th width="20%">Timestamp</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for u, b, t in logs %}
+              <tr>
+                <td class="user-msg">{{ u }}</td>
+                <td><div class="bot-msg">{{ b }}</div></td>
+                <td>
+                  <div class="timestamp">
+                    <i class="far fa-clock"></i> {{ t }}
+                  </div>
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td
+                  colspan="3"
+                  style="
+                    text-align: center;
+                    padding: 50px;
+                    color: var(--text-muted);
+                  "
+                >
+                  <i
+                    class="fas fa-comments"
+                    style="
+                      font-size: 32px;
+                      margin-bottom: 15px;
+                      display: block;
+                      opacity: 0.3;
+                    "
+                  ></i>
+                  No conversation history found yet.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <div class="log-card">
-      <table id="logTable">
-        <thead>
-          <tr>
-            <th width="35%">You said</th>
-            <th width="45%">BOT replied</th>
-            <th width="20%">Date & Time</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for u, b, t in logs %}
-          <tr>
-            <td style="font-weight: 500;">{{ u }}</td>
-            <td class="bot-reply">{{ b }}</td>
-            <td class="time-stamp">{{ t }}</td>
-          </tr>
-          {% else %}
-          <tr>
-            <td colspan="3" style="text-align: center; color: var(--text-muted); padding: 30px;">No conversation history found.</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </div>
+    <!-- Script for Client-side Search -->
+    <script>
+      document.getElementById("search").addEventListener("keyup", function () {
+        let filter = this.value.toLowerCase();
+        let rows = document.querySelectorAll("#logTable tbody tr");
 
-  <script>
-    document.getElementById('search').addEventListener('keyup', function() {
-      let val = this.value.toLowerCase();
-      let rows = document.querySelectorAll('#logTable tbody tr');
-      
-      rows.forEach(row => {
-        let text = row.textContent.toLowerCase();
-        row.style.display = text.includes(val) ? '' : 'none';
+        rows.forEach((row) => {
+          let text = row.textContent.toLowerCase();
+          row.style.display = text.includes(filter) ? "" : "none";
+        });
       });
-    });
-  </script>
-
-</body>
+    </script>
+  </body>
 </html>
