@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nexus Admin | Bank of Trust</title>
+    <title>BankBot Admin | Bank of Trust</title>
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
       rel="stylesheet"
@@ -352,7 +352,7 @@
     <nav class="sidebar">
       <div class="brand">
         <i class="fas fa-robot"></i>
-        <h2>BankBot <span>Nexus</span></h2>
+        <h2>BankBot <span>Admin</span></h2>
       </div>
 
       <div class="nav-item active" onclick="switchTab('dashboard')">
@@ -365,7 +365,7 @@
         <i class="fas fa-book"></i> Knowledge Base
       </div>
       <div class="nav-item" onclick="switchTab('logs')">
-        <i class="fas fa-list-alt"></i> System Logs
+        <i class="fas fa-list-alt"></i> User Query Logs
       </div>
 
       <div class="user-panel">
@@ -595,7 +595,7 @@
       <div id="logs" class="tab-content">
         <div class="data-panel">
           <div class="panel-header">
-            <div class="panel-title">System Audit Logs (Last 100)</div>
+            <div class="panel-title">User Query Logs (Last 100)</div>
             <div style="display: flex; gap: 10px">
               <button class="btn btn-outline" onclick="loadSystemLogs()">
                 <i class="fas fa-sync-alt"></i> Refresh
@@ -650,7 +650,7 @@
           dashboard: "Dashboard Overview",
           training: "Neural Network Training",
           faqs: "Knowledge Base Management",
-          logs: "System Audit Logs",
+          logs: "User Query Logs",
         };
         document.getElementById("page-title").innerText = titles[tabId];
 
