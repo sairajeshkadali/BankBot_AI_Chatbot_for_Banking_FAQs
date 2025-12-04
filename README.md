@@ -199,29 +199,21 @@ Use these credentials to explore the different user roles.
 
 ## 📸 Project Screenshots
 
-### 1. Home Page
-![Home Page](static/images/home_page.png)
+| **Home Page** | **Customer Login** |
+|:---:|:---:|
+| ![Home Page](static/images/home_page.jpg) | ![Login](static/images/login_page.jpg) |
 
-### 2. Customer Login Page
-![Customer Login Page](static/images/login_page.png)
+| **Customer Dashboard** | **AI Chatbot Interface** |
+|:---:|:---:|
+| ![Dashboard](static/images/customer_dashboard.jpg) | ![Chat](static/images/chat_interface.jpg) |
 
-### 3. Customer Dashboard
-![Customer Dashboard](static/images/customer_dashboard.png)
+| **History of Queries** | **Admin Login** |
+|:---:|:---:|
+| ![History](static/images/query_history.jpg) | ![Admin Login](static/images/admin_login.jpg) |
 
-### 4. AI Chatbot Interface
-![AI Chatbot Interface](static/images/chat_interface.png)
-
-### 5. History of Queries
-![History of Queries](static/images/query_history.png)
-
-### 6. Admin Login Page
-![Admin Login Page](static/images/admin_login.png)
-
-### 7. Admin Dashboard
-![Admin Dashboard](static/images/admin_dashboard.png)
-
-### 8. User Query Logs
-![User Query Logs](static/images/chat_logs.png)
+| **Admin Dashboard** | **User Query Logs** |
+|:---:|:---:|
+| ![Admin Dash](static/images/admin_dashboard.jpg) | ![Logs](static/images/chat_logs.jpg) |
 
 -----
 
